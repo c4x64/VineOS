@@ -98,7 +98,17 @@ class 性能采样器 {
   }
   fun 启动采样(配置: 采样配置 = 采样配置()): Job {
     停止采样()
-    val 任务 = 作用域.launch { while (isActive) { try { 采集一次() } catch (异常: Exception) { } kotlinx.coroutines.delay(配置.间隔毫秒) } }
+    val 间隔毫秒 = 配置.间隔毫秒
+    val 任务 = 作用域.launch {
+        while (isActive) {
+            try {
+                采集一次()
+            } catch (异常: Exception) {
+                /* 单次采样失败不中断循环 */
+            }
+            delay(间隔毫秒)
+        }
+    }
     采样任务 = 任务
     return 任务
   }
