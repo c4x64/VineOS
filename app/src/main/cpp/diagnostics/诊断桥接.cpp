@@ -43,9 +43,11 @@ std::string 生成诊断摘要(){
 }  // namespace 诊断
 }  // namespace vine
 extern "C" {
-JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos_诊断_诊断原生桥_原生获取诊断摘要(JNIEnv* e, jobject){ auto s = vine::诊断::生成诊断摘要(); return e->NewStringUTF(s.c_str()); }
-JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos_诊断_诊断原生桥_原生获取性能摘要(JNIEnv* e, jobject){ auto s = vine::诊断::生成性能摘要(); return e->NewStringUTF(s.c_str()); }
-JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos_诊断_诊断原生桥_原生获取内存摘要(JNIEnv* e, jobject){ auto s = vine::诊断::生成内存摘要(); return e->NewStringUTF(s.c_str()); }
-JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos_诊断_诊断原生桥_原生获取线程摘要(JNIEnv* e, jobject){ auto s = vine::诊断::生成线程摘要(); return e->NewStringUTF(s.c_str()); }
-JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos_诊断_诊断原生桥_原生获取错误摘要(JNIEnv* e, jobject){ auto s = vine::诊断::生成错误摘要(); return e->NewStringUTF(s.c_str()); }
+// JNI 静态注册名必须为 ASCII 转义形（包名点号变下划线，非 ASCII 按 UTF-16
+// 码元输出 _0xxxx），否则运行时按转义名查找会找不到中文原名函数。
+JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos__08bca_065ad__08bca_065ad_0539f_0751f_06865__0539f_0751f_083b7_053d6_08bca_065ad_06458_08981(JNIEnv* e, jobject){ auto s = vine::诊断::生成诊断摘要(); return e->NewStringUTF(s.c_str()); }
+JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos__08bca_065ad__08bca_065ad_0539f_0751f_06865__0539f_0751f_083b7_053d6_06027_080fd_06458_08981(JNIEnv* e, jobject){ auto s = vine::诊断::生成性能摘要(); return e->NewStringUTF(s.c_str()); }
+JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos__08bca_065ad__08bca_065ad_0539f_0751f_06865__0539f_0751f_083b7_053d6_05185_05b58_06458_08981(JNIEnv* e, jobject){ auto s = vine::诊断::生成内存摘要(); return e->NewStringUTF(s.c_str()); }
+JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos__08bca_065ad__08bca_065ad_0539f_0751f_06865__0539f_0751f_083b7_053d6_07ebf_07a0b_06458_08981(JNIEnv* e, jobject){ auto s = vine::诊断::生成线程摘要(); return e->NewStringUTF(s.c_str()); }
+JNIEXPORT jstring JNICALL Java_com_hexadecinull_vineos__08bca_065ad__08bca_065ad_0539f_0751f_06865__0539f_0751f_083b7_053d6_09519_08bef_06458_08981(JNIEnv* e, jobject){ auto s = vine::诊断::生成错误摘要(); return e->NewStringUTF(s.c_str()); }
 }

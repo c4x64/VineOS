@@ -2,8 +2,8 @@
 // 模块：安全桥接（JNI）
 // 说明：将原生哈希／沙箱／原子写能力暴露给 Kotlin 层，真实实现。
 // 约定：注释与标识一律中文；标准库／系统调用／JNI 接口保持英文。
-// 命名：JNI 静态注册名按规范由包名类名方法名拼接，中文部分取 UTF-8
-//   原字节（中文三字节编码在标准与改进 UTF-8 下一致，可精确匹配）。
+// 命名：JNI 静态注册名必须为 ASCII 转义形（非 ASCII 按 UTF-16 码元
+//   输出 _0xxxx），否则运行时按转义名查找会找不到中文原名函数。
 // 配套 Kotlin：com.hexadecinull.vineos.安全.原生安全桥接。
 // ==================================================================
 #include <jni.h>
@@ -40,7 +40,7 @@ static jstring 回字符串(JNIEnv* 环境, const std::string& 文本) {
 
 // 原生计算文件 SHA-256，失败返回空串，Kotlin 层回退到纯实现。
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hexadecinull_vineos_安全_原生安全桥接_计算文件哈希(JNIEnv* 环境, jclass, jstring 路径) {
+Java_com_hexadecinull_vineos__05b89_05168__0539f_0751f_05b89_05168_06865_063a5__0539f_0751f_08ba1_07b97_06587_04ef6_054c8_05e0c(JNIEnv* 环境, jclass, jstring 路径) {
   std::string 路径串 = 取字符串(环境, 路径);
   if (路径串.empty()) return 回字符串(环境, "");
   vine::安全::文件哈希结果 结果 = vine::安全::哈希校验器::计算文件沙256(路径串);
@@ -50,7 +50,7 @@ Java_com_hexadecinull_vineos_安全_原生安全桥接_计算文件哈希(JNIEnv
 
 // 原生沙箱综合评分，返回 0-100，失败返回 -1。
 extern "C" JNIEXPORT jint JNICALL
-Java_com_hexadecinull_vineos_安全_原生安全桥接_沙箱评分(JNIEnv* 环境, jclass) {
+Java_com_hexadecinull_vineos__05b89_05168__0539f_0751f_05b89_05168_06865_063a5__0539f_0751f_06c99_07bb1_08bc4_05206(JNIEnv* 环境, jclass) {
   (void)环境;
   vine::安全::沙箱状态 状态 = vine::安全::沙箱检查器::综合检查();
   return (jint)vine::安全::沙箱检查器::评分(状态);
@@ -58,14 +58,14 @@ Java_com_hexadecinull_vineos_安全_原生安全桥接_沙箱评分(JNIEnv* 环�
 
 // 原生沙箱报告文本。
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hexadecinull_vineos_安全_原生安全桥接_沙箱报告(JNIEnv* 环境, jclass) {
+Java_com_hexadecinull_vineos__05b89_05168__0539f_0751f_05b89_05168_06865_063a5__0539f_0751f_06c99_07bb1_062a5_0544a(JNIEnv* 环境, jclass) {
   vine::安全::沙箱状态 状态 = vine::安全::沙箱检查器::综合检查();
   return 回字符串(环境, vine::安全::沙箱检查器::报告文本(状态));
 }
 
 // 原生原子写入文本，成功返回写入字节数，失败返回 -1 并写出错误。
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_hexadecinull_vineos_安全_原生安全桥接_原子写入文本(JNIEnv* 环境, jclass, jstring 路径, jstring 内容) {
+Java_com_hexadecinull_vineos__05b89_05168__0539f_0751f_05b89_05168_06865_063a5__0539f_0751f_0539f_05b50_05199_05165_06587_0672c(JNIEnv* 环境, jclass, jstring 路径, jstring 内容) {
   std::string 路径串 = 取字符串(环境, 路径);
   std::string 内容串 = 取字符串(环境, 内容);
   if (路径串.empty()) return (jlong)-1;
@@ -78,7 +78,7 @@ Java_com_hexadecinull_vineos_安全_原生安全桥接_原子写入文本(JNIEnv
 
 // 原生路径规范化，失败返回空串。
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hexadecinull_vineos_安全_原生安全桥接_规范化路径(JNIEnv* 环境, jclass, jstring 原始) {
+Java_com_hexadecinull_vineos__05b89_05168__0539f_0751f_05b89_05168_06865_063a5__0539f_0751f_089c4_08303_05316_08def_05f84(JNIEnv* 环境, jclass, jstring 原始) {
   std::string 原始串 = 取字符串(环境, 原始);
   if (原始串.empty()) return 回字符串(环境, "");
   vine::安全::规范化选项 选项;
@@ -89,7 +89,7 @@ Java_com_hexadecinull_vineos_安全_原生安全桥接_规范化路径(JNIEnv* �
 
 // 原生 HMAC-SHA256 十六进制，失败返回空串。
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hexadecinull_vineos_安全_原生安全桥接_计算HMAC(JNIEnv* 环境, jclass, jstring 密钥, jstring 消息) {
+Java_com_hexadecinull_vineos__05b89_05168__0539f_0751f_05b89_05168_06865_063a5__0539f_0751f_08ba1_07b97HMAC(JNIEnv* 环境, jclass, jstring 密钥, jstring 消息) {
   std::string 密钥串 = 取字符串(环境, 密钥);
   std::string 消息串 = 取字符串(环境, 消息);
   if (密钥串.empty()) return 回字符串(环境, "");
@@ -99,6 +99,6 @@ Java_com_hexadecinull_vineos_安全_原生安全桥接_计算HMAC(JNIEnv* 环境
 
 // 原生版本标识，供 Kotlin 层确认桥接已加载。
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hexadecinull_vineos_安全_原生安全桥接_桥接版本(JNIEnv* 环境, jclass) {
+Java_com_hexadecinull_vineos__05b89_05168__0539f_0751f_05b89_05168_06865_063a5__06865_063a5_07248_0672c(JNIEnv* 环境, jclass) {
   return 回字符串(环境, "安全桥接 1.0");
 }
