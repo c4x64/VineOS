@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 data class 防火墙规则(val 编号: String, val 方向: 防火墙方向, val 协议: 防火墙协议, val 来源: String?, val 目标: String?, val 端口: Int?, val 动作: 防火墙动作, val 优先级: Int, val 备注: String, val 已生效: Boolean)
 
 @Singleton
-class 防火墙规则管理器 @Inject constructor(private val 执行器: 特权命令执行器) {
+class 防火墙规则管理器 @Inject constructor(internal val 执行器: 特权命令执行器) {
     private val 规则表 = ConcurrentHashMap<String, 防火墙规则>()
     /** 是否优先 nft。 */ var 优先Nft: Boolean = true
     private fun 用Nft(): Boolean = 优先Nft && try { 执行器.探测二进制路径("nft").可用 } catch (忽略: Exception) { false }

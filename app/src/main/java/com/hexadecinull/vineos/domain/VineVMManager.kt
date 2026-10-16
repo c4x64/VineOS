@@ -135,7 +135,7 @@ class VineVMManager @Inject constructor(
                 原因链 += "命名空间模块未注入"
                 return@runCatching
             }
-            val 名称 = ("vine-" + instance.id.lowercase().replace("_", "-")).take(28)
+            val 名称 = ("vine-" + 实例.id.lowercase().replace("_", "-")).take(28)
             val 已存在 = runCatching { 命名空间.检查存在(名称) }.getOrDefault(false)
             if (已存在) return "命名空间:" + 名称 + "(已存在复用)"
             val 创建 = runCatching { 命名空间.创建命名空间(名称) }.getOrNull()
@@ -154,7 +154,7 @@ class VineVMManager @Inject constructor(
             }
             val 能力 = 虚拟化.探测能力()
             if (能力.是否支持) {
-                val 负载 = runCatching { 虚拟化.负载配置(instance.id, instance.storagePath) }.getOrDefault(emptyMap())
+                val 负载 = runCatching { 虚拟化.负载配置(实例.id, 实例.storagePath) }.getOrDefault(emptyMap())
                 val 系统 = 负载["os"] ?: "microdroid"
                 return "虚拟化框架:" + 能力.原因说明 + "(系统=" + 系统 + ")"
             }
@@ -169,7 +169,7 @@ class VineVMManager @Inject constructor(
             }
             if (回退.是否可用()) {
                 val 命令 = runCatching {
-                    回退.构造命令("proot", instance.storagePath.trimEnd('/') + "/rootfs", instance.storagePath)
+                    回退.构造命令("proot", 实例.storagePath.trimEnd('/') + "/rootfs", 实例.storagePath)
                 }.getOrDefault(emptyList())
                 val 摘要 = if (命令.isNotEmpty()) 命令.take(3).joinToString(" ") else "proot"
                 return "用户态回退:可用(" + 摘要 + "…)"

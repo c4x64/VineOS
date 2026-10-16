@@ -42,19 +42,26 @@ class InstanceDetailViewModel @Inject constructor(
     private val 快照忙碌流 = MutableStateFlow(false)
     private val 快照提示流 = MutableStateFlow("")
 
-    // No grace period on uiState: sources are already-cached hot flows, so a rebuild on resubscribe is cheap
-    val uiState: StateFlow<InstanceDetailUiState> = combine(
+    // No grace period on uiState: sources are already-cached hot flows, so a rebuild on resubscribe is cheap.
+    // Two nested combines (3+2 flows) instead of one 6-flow combine for
+    // deterministic overload resolution across Kotlin versions.
+    private val 基础流 = combine(
         instanceIdFlow,
         instanceRepo.observeAll(),
         diagnosticsFlow,
+    ) { 编号, 全部, 诊断 -> Triple(编号, 全部, 诊断) }
+    private val 快照流 = combine(
         快照列表流,
         快照忙碌流,
         快照提示流,
-    ) { 编号: String, 全部: List<VMInstance>, 诊断: String, 快照: List<String>, 忙碌: Boolean, 提示: String ->
+    ) { 快照, 忙碌, 提示 -> Triple(快照, 忙碌, 提示) }
+    val uiState: StateFlow<InstanceDetailUiState> = combine(基础流, 快照流) { 基础, 快照 ->
+        val (编号, 全部, 诊断) = 基础
+        val (快照名, 忙碌, 提示) = 快照
         InstanceDetailUiState(
             instance = 全部.find { it.id == 编号 },
             diagnostics = 诊断,
-            快照列表 = 快照,
+            快照列表 = 快照名,
             快照忙碌 = 忙碌,
             快照提示 = 提示,
         )

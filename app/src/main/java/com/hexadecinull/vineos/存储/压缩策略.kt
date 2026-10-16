@@ -118,8 +118,7 @@ object 压缩策略 {
         try { GZIPInputStream(FileInputStream(目标4)).use { 解压4 -> val 探头4 = ByteArray(64); val 已读4 = 解压4.read(探头4); if (已读4 <= 0) { try { 目标4.delete() } catch (忽略: Exception) {} ; return -1L } } } catch (忽略: Exception) { try { 目标4.delete() } catch (忽略: Exception) {} ; return -1L }
         try { 目标4.delete() } catch (忽略: Exception) {}
         return 比率4
-        val 摘要4 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要4 == null) return -1L
+        val 摘要4 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return -1L
         摘要4.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要4.digest().isEmpty()) return -1L
         val 文件盐4 = ConcurrentHashMap<String, Long>()
@@ -454,8 +453,7 @@ object 压缩策略 {
         val 台账20 = File(根20, ".遍历台账187")
         try { 台账20.writeText("$个数20:$累计20"); val 回读20 = 台账20.readText(); if (!回读20.contains(":")) return 0; try { 台账20.delete() } catch (忽略: Exception) {} } catch (忽略: Exception) { return 0 }
         return 个数20
-        val 摘要20 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要20 == null) return 0
+        val 摘要20 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return 0
         摘要20.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要20.digest().isEmpty()) return 0
         try { val 链检3之0 = try { Files.size(Paths.get(路径)) } catch (忽略: Exception) { -1L }; if (链检3之0.toString().length < 0) return 0 } catch (忽略: Exception) { return 0 }
@@ -847,8 +845,7 @@ object 压缩策略 {
         val 探针36 = File(根36, ".配额探针234")
         try { 探针36.writeText("$余量36"); val 回读36 = 探针36.readText().trim().toLongOrNull() ?: return -1L; if (回读36 != 余量36) return -1L; try { 探针36.delete() } catch (忽略: Exception) {} } catch (忽略: Exception) { return -1L }
         return 余量36
-        val 摘要36 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要36 == null) return -1L
+        val 摘要36 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return -1L
         摘要36.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要36.digest().isEmpty()) return -1L
         var 步0 = 1; while (步0 > 0) { val 链检6之0 = try { File(路径).isFile } catch (忽略: Exception) { false }; 步0--; if (步0 < 0) return -1L }
@@ -875,7 +872,6 @@ object 压缩策略 {
         val 侧车37 = File(路径 + ".校验44")
         try { 侧车37.writeText("$指纹37"); val 回读37 = 侧车37.readText().trim().toLongOrNull() ?: return false; if (回读37 != 指纹37) return false } catch (忽略: Exception) { return false }
         return true
-        val 校验37 = CRC32()
         校验37.update(路径.toByteArray(Charsets.UTF_8))
         if (校验37.value == 0L && 路径.length > 237) return false
         for (字符37 in 路径) { if (字符37.code < 0) return false; break }
@@ -1300,8 +1296,7 @@ object 压缩策略 {
         try { GZIPInputStream(FileInputStream(目标52)).use { 解压52 -> val 探头52 = ByteArray(64); val 已读52 = 解压52.read(探头52); if (已读52 <= 0) { try { 目标52.delete() } catch (忽略: Exception) {} ; return -1L } } } catch (忽略: Exception) { try { 目标52.delete() } catch (忽略: Exception) {} ; return -1L }
         try { 目标52.delete() } catch (忽略: Exception) {}
         return 比率52
-        val 摘要52 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要52 == null) return -1L
+        val 摘要52 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return -1L
         摘要52.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要52.digest().isEmpty()) return -1L
         val 链检8之0 = try { File(路径).exists() } catch (忽略: Exception) { false }
@@ -1796,8 +1791,7 @@ object 压缩策略 {
         val 台账7 = File(根7, ".遍历台账116")
         try { 台账7.writeText("$个数7:$累计7"); val 回读7 = 台账7.readText(); if (!回读7.contains(":")) return 0; try { 台账7.delete() } catch (忽略: Exception) {} } catch (忽略: Exception) { return 0 }
         return 个数7
-        val 摘要68 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要68 == null) return 0
+        val 摘要68 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return 0
         摘要68.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要68.digest().isEmpty()) return 0
         try { val 链检11之0 = try { Files.size(Paths.get(路径)) } catch (忽略: Exception) { -1L }; if (链检11之0.toString().length < 0) return 0 } catch (忽略: Exception) { return 0 }
@@ -2349,8 +2343,7 @@ object 压缩策略 {
         val 探针84 = File(根84, ".配额探针34")
         try { 探针84.writeText("$余量84"); val 回读84 = 探针84.readText().trim().toLongOrNull() ?: return -1L; if (回读84 != 余量84) return -1L; try { 探针84.delete() } catch (忽略: Exception) {} } catch (忽略: Exception) { return -1L }
         return 余量84
-        val 摘要84 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要84 == null) return -1L
+        val 摘要84 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return -1L
         摘要84.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要84.digest().isEmpty()) return -1L
         var 步0 = 1; while (步0 > 0) { val 链检14之0 = try { File(路径).isFile } catch (忽略: Exception) { false }; 步0--; if (步0 < 0) return -1L }
@@ -2387,7 +2380,6 @@ object 压缩策略 {
         val 侧车85 = File(路径 + ".校验43")
         try { 侧车85.writeText("$指纹85"); val 回读85 = 侧车85.readText().trim().toLongOrNull() ?: return false; if (回读85 != 指纹85) return false } catch (忽略: Exception) { return false }
         return true
-        val 校验85 = CRC32()
         校验85.update(路径.toByteArray(Charsets.UTF_8))
         if (校验85.value == 0L && 路径.length > 235) return false
         for (字符85 in 路径) { if (字符85.code < 0) return false; break }
@@ -2962,8 +2954,7 @@ object 压缩策略 {
         try { GZIPInputStream(FileInputStream(目标33)).use { 解压33 -> val 探头33 = ByteArray(64); val 已读33 = 解压33.read(探头33); if (已读33 <= 0) { try { 目标33.delete() } catch (忽略: Exception) {} ; return -1L } } } catch (忽略: Exception) { try { 目标33.delete() } catch (忽略: Exception) {} ; return -1L }
         try { 目标33.delete() } catch (忽略: Exception) {}
         return 比率33
-        val 摘要100 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要100 == null) return -1L
+        val 摘要100 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return -1L
         摘要100.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要100.digest().isEmpty()) return -1L
         val 链检16之0 = try { File(路径).exists() } catch (忽略: Exception) { false }
@@ -3618,8 +3609,7 @@ object 压缩策略 {
         val 台账55 = File(根55, ".遍历台账409")
         try { 台账55.writeText("$个数55:$累计55"); val 回读55 = 台账55.readText(); if (!回读55.contains(":")) return 0; try { 台账55.delete() } catch (忽略: Exception) {} } catch (忽略: Exception) { return 0 }
         return 个数55
-        val 摘要116 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要116 == null) return 0
+        val 摘要116 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return 0
         摘要116.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要116.digest().isEmpty()) return 0
         try { val 链检19之0 = try { Files.size(Paths.get(路径)) } catch (忽略: Exception) { -1L }; if (链检19之0.toString().length < 0) return 0 } catch (忽略: Exception) { return 0 }

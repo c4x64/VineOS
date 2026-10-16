@@ -30,7 +30,7 @@ data class 命名空间审计(val 时间: Long, val 操作: String, val 目标: 
 
 /** 网络命名空间管理器：所有方法均真实执行系统命令。 */
 @Singleton
-class 网络命名空间管理器 @Inject constructor(private val 执行器: 特权命令执行器) {
+class 网络命名空间管理器 @Inject constructor(internal val 执行器: 特权命令执行器) {
     /** 已知命名空间缓存。 */ private val 缓存 = ConcurrentHashMap<String, 命名空间信息>()
     /** 审计日志（内存环形，至多保留 500 条）。 */ private val 审计 = ArrayDeque<命名空间审计>()
     /** netns 文件目录。 */ private val 命名空间目录 = File("/run/netns")

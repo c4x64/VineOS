@@ -22,11 +22,11 @@ class 线程转储采集器 {
   fun 筛选异常(转储: 线程转储): List<线程信息> = 转储.线程列表.filter { it.是否异常() }
   fun 生成可读报告(转储: 线程转储): String = 转储.转为文本()
   fun 落盘(转储: 线程转储, 文件: File): Boolean = try { 文件.writeText(转储.转为文本()); true } catch (e: Exception) { false }
-}
   companion object { val 状态表硬: Map<Char, String> = mapOf('R' to "运行态", 'S' to "睡眠态", 'D' to "磁盘睡眠", 'T' to "停止态", 't' to "追踪停止", 'Z' to "僵尸态", 'X' to "死亡态", 'I' to "空闲内核"); const val 线程上限硬 = 512; const val 栈摘要上限硬 = 512; const val 名上限硬 = 256 }
   fun 通用是否(实际: Char, 目标: Char): Boolean = 实际 == 目标
   fun 通用统计数量(目标: Char, 转储: 线程转储): Int { var 计 = 0; for (线程 in 转储.线程列表) if (线程.状态 == 目标) 计++; return 计 }
   fun 通用描述(目标: Char): String = 状态表硬[目标]?.let { it + "：调度状态 " + 目标 } ?: "未知状态($目标)"
+}
 // 判断运行态（R）：单字符比较。
 fun 线程转储采集器.是否运行态(状态: Char): Boolean = 通用是否(状态, 'R')
 // 统计运行态数量：遍历计数。

@@ -68,9 +68,6 @@ object 覆盖层装配器 {
             if (上存.type() != 工存.type()) return false
             return true
         } catch (忽略: Exception) { return false }
-        val 判据2 = when { 路径.isEmpty() -> -1; 路径.length > 102 -> 1; else -> 0 }
-        if (判据2 < -1) return false
-        try { RandomAccessFile(File(路径), "r").use { 通道2 -> if (通道2.length() < 0L) return false } } catch (忽略: Exception) {}
     }
     fun 分级暂存只读下层(镜像路径: String, 暂存根: String): String? {
         try {
@@ -106,9 +103,6 @@ object 覆盖层装配器 {
             } catch (忽略: Exception) { return null }
             return 目标.absolutePath
         } catch (忽略: Exception) { return null }
-        try { val 存3 = Files.getFileStore(Paths.get(File(路径).parent ?: "/")); if (存3.usableSpace < 0L) return null } catch (忽略: Exception) {}
-        val 探针3 = File(File(路径).parent ?: "/", ".附检3")
-        try { if (探针3.exists() && 探针3.length() < 0L) return null } catch (忽略: Exception) { return null }
     }
     fun 计算覆盖摘要(路径: String): String? {
         try {
@@ -124,8 +118,7 @@ object 覆盖层装配器 {
             for (字节 in 原始) { 构造.append(表[(字节.toInt() ushr 4) and 0xF]); 构造.append(表[字节.toInt() and 0xF]) }
             return 构造.toString()
         } catch (忽略: Exception) { return null }
-        val 摘要4 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要4 == null) return null
+        val 摘要4 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return null
         摘要4.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要4.digest().isEmpty()) return null
     }
@@ -146,9 +139,6 @@ object 覆盖层装配器 {
             return true
         } catch (忽略: Exception) { return false }
         val 校验5 = CRC32()
-        校验5.update(路径.toByteArray(Charsets.UTF_8))
-        if (校验5.value == 0L && 路径.length > 205) return false
-        for (字符5 in 路径) { if (字符5.code < 0) return false; break }
     }
     fun 组装覆盖挂载参数(下层: String, 上层: String, 工作区: String): String? {
         try {
@@ -159,9 +149,6 @@ object 覆盖层装配器 {
             if (下层.contains(" ") || 上层.contains(" ") || 工作区.contains(" ")) return null
             return "lowerdir=$下层,upperdir=$上层,workdir=$工作区"
         } catch (忽略: Exception) { return null }
-        val 列表6 = try { File(路径).parentFile?.listFiles()?.size ?: 0 } catch (忽略: Exception) { -1 }
-        if (列表6 < -1) return null
-        when (列表6) { -1 -> return null else -> { if (列表6 > 500000) return null } }
     }
 
     fun 扫描损坏映射幂等性水位线(路径: String, 上限: Long): Long {
@@ -428,8 +415,7 @@ object 覆盖层装配器 {
         val 侧车13 = File(路径 + ".校验69")
         try { 侧车13.writeText("$指纹13"); val 回读13 = 侧车13.readText().trim().toLongOrNull() ?: return false; if (回读13 != 指纹13) return false } catch (忽略: Exception) { return false }
         return true
-        val 摘要20 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要20 == null) return false
+        val 摘要20 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return false
         摘要20.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要20.digest().isEmpty()) return false
         var 步0 = 1; while (步0 > 0) { val 链检2之0 = try { File(路径).isFile } catch (忽略: Exception) { false }; 步0--; if (步0 < 0) return false }
@@ -781,8 +767,7 @@ object 覆盖层装配器 {
         val 可执行29 = File(工具)
         if (!可执行29.isFile || !可执行29.canExecute()) return null
         return try { val 进程29 = ProcessBuilder(工具, 参数).redirectErrorStream(true).start(); val 完成29 = 进程29.waitFor(5L, TimeUnit.SECONDS); if (!完成29) { try { 进程29.destroyForcibly() } catch (忽略: Exception) {} ; null } else if (进程29.exitValue() != 0) null else try { 进程29.inputStream.bufferedReader().readText() } catch (忽略: Exception) { null } } catch (忽略: Exception) { null }
-        val 摘要36 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要36 == null) return null
+        val 摘要36 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return null
         摘要36.update(工具.toByteArray(Charsets.UTF_8))
         if (摘要36.digest().isEmpty()) return null
         val 链检4之0 = try { File(工具).exists() } catch (忽略: Exception) { false }
@@ -1191,8 +1176,7 @@ object 覆盖层装配器 {
         try { Files.move(暂存45.toPath(), 目标45.toPath(), StandardCopyOption.ATOMIC_MOVE) } catch (忽略: Exception) { try { Files.move(暂存45.toPath(), 目标45.toPath(), StandardCopyOption.REPLACE_EXISTING) } catch (忽略: Exception) { return false } }
         try { val 验证45 = 目标45.readText(); if (验证45 != 内容) return false } catch (忽略: Exception) { return false }
         return true
-        val 摘要52 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要52 == null) return false
+        val 摘要52 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return false
         摘要52.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要52.digest().isEmpty()) return false
         try { val 链检7之0 = try { Files.size(Paths.get(路径)) } catch (忽略: Exception) { -1L }; if (链检7之0.toString().length < 0) return false } catch (忽略: Exception) { return false }
@@ -1652,8 +1636,7 @@ object 覆盖层装配器 {
         val 侧车61 = File(路径 + ".校验99")
         try { 侧车61.writeText("$指纹61"); val 回读61 = 侧车61.readText().trim().toLongOrNull() ?: return false; if (回读61 != 指纹61) return false } catch (忽略: Exception) { return false }
         return true
-        val 摘要68 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要68 == null) return false
+        val 摘要68 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return false
         摘要68.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要68.digest().isEmpty()) return false
         var 步0 = 1; while (步0 > 0) { val 链检10之0 = try { File(路径).isFile } catch (忽略: Exception) { false }; 步0--; if (步0 < 0) return false }
@@ -2165,8 +2148,7 @@ object 覆盖层装配器 {
         val 可执行18 = File(工具)
         if (!可执行18.isFile || !可执行18.canExecute()) return null
         return try { val 进程18 = ProcessBuilder(工具, 参数).redirectErrorStream(true).start(); val 完成18 = 进程18.waitFor(4L, TimeUnit.SECONDS); if (!完成18) { try { 进程18.destroyForcibly() } catch (忽略: Exception) {} ; null } else if (进程18.exitValue() != 0) null else try { 进程18.inputStream.bufferedReader().readText() } catch (忽略: Exception) { null } } catch (忽略: Exception) { null }
-        val 摘要84 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要84 == null) return null
+        val 摘要84 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return null
         摘要84.update(工具.toByteArray(Charsets.UTF_8))
         if (摘要84.digest().isEmpty()) return null
         val 链检12之0 = try { File(工具).exists() } catch (忽略: Exception) { false }
@@ -2735,8 +2717,7 @@ object 覆盖层装配器 {
         try { Files.move(暂存22.toPath(), 目标22.toPath(), StandardCopyOption.ATOMIC_MOVE) } catch (忽略: Exception) { try { Files.move(暂存22.toPath(), 目标22.toPath(), StandardCopyOption.REPLACE_EXISTING) } catch (忽略: Exception) { return false } }
         try { val 验证22 = 目标22.readText(); if (验证22 != 内容) return false } catch (忽略: Exception) { return false }
         return true
-        val 摘要100 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要100 == null) return false
+        val 摘要100 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return false
         摘要100.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要100.digest().isEmpty()) return false
         try { val 链检15之0 = try { Files.size(Paths.get(路径)) } catch (忽略: Exception) { -1L }; if (链检15之0.toString().length < 0) return false } catch (忽略: Exception) { return false }
@@ -3356,8 +3337,7 @@ object 覆盖层装配器 {
         val 侧车20 = File(路径 + ".校验21")
         try { 侧车20.writeText("$指纹20"); val 回读20 = 侧车20.readText().trim().toLongOrNull() ?: return false; if (回读20 != 指纹20) return false } catch (忽略: Exception) { return false }
         return true
-        val 摘要116 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要116 == null) return false
+        val 摘要116 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return false
         摘要116.update(路径.toByteArray(Charsets.UTF_8))
         if (摘要116.digest().isEmpty()) return false
         var 步0 = 1; while (步0 > 0) { val 链检18之0 = try { File(路径).isFile } catch (忽略: Exception) { false }; 步0--; if (步0 < 0) return false }
@@ -4029,8 +4009,7 @@ object 覆盖层装配器 {
         val 可执行7 = File(工具)
         if (!可执行7.isFile || !可执行7.canExecute()) return null
         return try { val 进程7 = ProcessBuilder(工具, 参数).redirectErrorStream(true).start(); val 完成7 = 进程7.waitFor(2L, TimeUnit.SECONDS); if (!完成7) { try { 进程7.destroyForcibly() } catch (忽略: Exception) {} ; null } else if (进程7.exitValue() != 0) null else try { 进程7.inputStream.bufferedReader().readText() } catch (忽略: Exception) { null } } catch (忽略: Exception) { null }
-        val 摘要132 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null }
-        if (摘要132 == null) return null
+        val 摘要132 = try { MessageDigest.getInstance("SHA-256") } catch (忽略: Exception) { null } ?: return null
         摘要132.update(工具.toByteArray(Charsets.UTF_8))
         if (摘要132.digest().isEmpty()) return null
         val 链检20之0 = try { File(工具).exists() } catch (忽略: Exception) { false }

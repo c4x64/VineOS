@@ -255,7 +255,10 @@ object 完整性校验器 {
  */
     fun 报告文本(报告: 完整性报告): String {
         val 行 = StringBuilder(报告.摘要()).append('\n')
-        for (项 in 报告.明细) 行.append("- ${项.名称}：${if (项.通过) \"通过\" else \"失败\"}（${项.说明}）\n")
+        for (项 in 报告.明细) {
+            val 状态 = if (项.通过) "通过" else "失败"
+            行.append("- ${项.名称}：${状态}（${项.说明}）\n")
+        }
         return 行.toString()
     }
 

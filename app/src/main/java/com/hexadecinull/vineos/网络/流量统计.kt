@@ -438,6 +438,14 @@ class 流量统计器 @Inject constructor(private val 执行器: 特权命令执
         return 过滤.sortedByDescending { it.收字节 + it.发字节 }
     }
     /** 第35组日志开关。 */ var 详细日志35: Boolean = false
+    fun 查询前缀流量36(前缀: String = "v"): List<网卡流量> {
+        val 全部 = 读取系统流量()
+        val 过滤 = 全部.filter { it.网卡.startsWith(前缀) }
+        过滤.forEach { 同步历史(it) }
+        if (过滤.isEmpty() && 详细日志36) println("前缀" + 前缀 + "无匹配，共" + 全部.size + "块网卡")
+        return 过滤.sortedByDescending { it.收字节 + it.发字节 }
+    }
+    /** 第36组日志开关。 */ var 详细日志36: Boolean = false
 
 }
 

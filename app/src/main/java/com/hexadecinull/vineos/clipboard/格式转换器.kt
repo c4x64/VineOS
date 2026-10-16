@@ -115,10 +115,10 @@ object 格式转换器 {
         for (单行 in 行) { if (单行.startsWith("http://") || 单行.startsWith("https://") || 单行.startsWith("content://") || 单行.startsWith("file://")) 链接计数 += 1 }
         return 链接计数 * 2 >= 行.size
     }
-    private val 换行标签规则 = Regex("(?i)<\s*br\s*/?\s*>")
-    private val 段落闭合规则 = Regex("(?i)</\s*p\s*>")
-    private val 段落开放规则 = Regex("(?i)<\s*p[^>]*>")
-    private val 分区闭合规则 = Regex("(?i)</\s*div\s*>")
+    private val 换行标签规则 = Regex("(?i)<\\s*br\\s*/?\\s*>")
+    private val 段落闭合规则 = Regex("(?i)</\\s*p\\s*>")
+    private val 段落开放规则 = Regex("(?i)<\\s*p[^>]*>")
+    private val 分区闭合规则 = Regex("(?i)</\\s*div\\s*>")
     private val 标签剥离规则 = Regex("<[^>]+>")
     private val 数字实体规则 = Regex("&#[0-9]+;")
     private val 空白折叠规则 = Regex("\\s+")

@@ -49,7 +49,6 @@ class 诊断视图模型(val 仓储: 诊断仓储 = 诊断仓储()) : ViewModel(
   }
 }
 @Composable fun 诊断总览界面(视图模型: 诊断视图模型 = 诊断视图模型()) {
-  val 快照 by 视图模型.快照流.collectAsState()
   LaunchedEffect(Unit) { 视图模型.刷新全部() }
   LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
     item { Text("诊断总览", style = MaterialTheme.typography.headlineSmall); Spacer(Modifier.height(8.dp)) }

@@ -108,12 +108,12 @@ class 显示视图模型(
             }
         }
         剪贴板调度.推送实现 = { 文本 ->
-            val 目标 = 实例编号 ?: return@推送实现 false
-            runCatching { 虚拟机管理.pushClipboard(目标, 文本) }.getOrDefault(false)
+            val 目标 = 实例编号
+            if (目标 == null) false else runCatching { 虚拟机管理.pushClipboard(目标, 文本) }.getOrDefault(false)
         }
         剪贴板调度.拉取实现 = {
-            val 目标 = 实例编号 ?: return@拉取实现 ""
-            runCatching { 虚拟机管理.pullClipboard(目标) }.getOrDefault("")
+            val 目标 = 实例编号
+            if (目标 == null) "" else runCatching { 虚拟机管理.pullClipboard(目标) }.getOrDefault("")
         }
         剪贴板调度.启动轮询()
     }
