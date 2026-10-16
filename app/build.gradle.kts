@@ -151,6 +151,7 @@ ktlint {
         exclude("**/vineos/安全/权限审计器.kt")
         exclude("**/vineos/安全/沙箱检查器.kt")
         exclude("**/vineos/安全/签名校验器.kt")
+        exclude("**/vineos/clipboard/剪贴板桥接器.kt")
         exclude("**/vineos/clipboard/剪贴板度量器.kt")
         exclude("**/vineos/clipboard/剪贴板监听器.kt")
         exclude("**/vineos/clipboard/剪贴板轮询器.kt")

@@ -29,9 +29,7 @@ class 快照管理器 @Inject constructor(private val 虚拟机管理: VineVMMan
         return 虚拟机管理.snapshot(实例, 净名)
     }
 
-    fun 恢复快照(实例: VMInstance, 名称: String): Boolean =
-        虚拟机管理.restoreSnapshot(实例, 名称)
+    fun 恢复快照(实例: VMInstance, 名称: String): Boolean = 虚拟机管理.restoreSnapshot(实例, 名称)
 
-    fun 删除快照(实例: VMInstance, 名称: String): Boolean =
-        File(实例.storagePath, "snapshots/$名称.tar.gz").delete()
+    fun 删除快照(实例: VMInstance, 名称: String): Boolean = File(实例.storagePath, "snapshots/$名称.tar.gz").delete()
 }

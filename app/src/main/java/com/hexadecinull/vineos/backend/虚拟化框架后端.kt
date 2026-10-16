@@ -17,10 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class 虚拟化框架后端 @Inject constructor(private val 虚拟机管理: VineVMManager) {
 
-    data class 虚拟化能力(
-        val 是否支持: Boolean,
-        val 原因说明: String,
-    )
+    data class 虚拟化能力(val 是否支持: Boolean, val 原因说明: String)
 
     fun 探测能力(): 虚拟化能力 {
         if (Build.VERSION.SDK_INT < 33) {

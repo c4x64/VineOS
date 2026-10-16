@@ -8,10 +8,10 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.hexadecinull.vineos.MainActivity
 import com.hexadecinull.vineos.VineApplication.Companion.CHANNEL_VM_RUNNING
-import com.hexadecinull.vineos.诊断.诊断仓储
-import com.hexadecinull.vineos.诊断.仓储配置
 import com.hexadecinull.vineos.网络.网络命名空间管理器
 import com.hexadecinull.vineos.网络.网络隔离编排器
+import com.hexadecinull.vineos.诊断.仓储配置
+import com.hexadecinull.vineos.诊断.诊断仓储
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
@@ -20,7 +20,9 @@ import javax.inject.Inject
 class VineService : Service() {
     // 网络管理器 ： 前台服务生命周期内保障命名空间子系统预热与实例网络收尾 。
     @Inject lateinit var 命名空间管理器: 网络命名空间管理器
+
     @Inject lateinit var 隔离编排器: 网络隔离编排器
+
     // 诊断仓储 ： 非注入构造 ， 生命周期由本服务亲自管理 ， 避免污染全局单例图 。
     private val 诊断库: 诊断仓储 = 诊断仓储()
     private var 诊断已启动: Boolean = false
@@ -68,26 +70,20 @@ class VineService : Service() {
     }
 
     // 为实例搭建隔离网络 ： 真实执行 netns 加网卡对加地址加防火墙全链路 。
-    fun 实例网络就绪(实例标识: String): String {
-        return runCatching {
-            val 状态 = 隔离编排器.搭建实例网络(实例标识)
-            "实例网络就绪:" + 状态.命名空间 + "/" + 状态.容器地址
-        }.getOrElse { 异常 -> "实例网络搭建失败:" + (异常.message?.take(200) ?: "未知错误") }
-    }
+    fun 实例网络就绪(实例标识: String): String = runCatching {
+        val 状态 = 隔离编排器.搭建实例网络(实例标识)
+        "实例网络就绪:" + 状态.命名空间 + "/" + 状态.容器地址
+    }.getOrElse { 异常 -> "实例网络搭建失败:" + (异常.message?.take(200) ?: "未知错误") }
 
     // 拆除实例网络 ： 真实删除转发 、 防火墙 、 网卡对与命名空间 。
-    fun 实例网络拆除(实例标识: String): Boolean {
-        return runCatching { 隔离编排器.拆除实例网络(实例标识) }.getOrDefault(false)
-    }
+    fun 实例网络拆除(实例标识: String): Boolean = runCatching { 隔离编排器.拆除实例网络(实例标识) }.getOrDefault(false)
 
     // 上报一次诊断快照 ： 真实采集性能加内存加线程并落盘 。
-    fun 上报诊断快照(): String {
-        return runCatching {
-            val 快照 = 诊断库.生成诊断快照()
-            诊断库.落盘快照()
-            快照.转为多行().take(1000)
-        }.getOrElse { 异常 -> "诊断采集失败:" + (异常.message?.take(200) ?: "未知错误") }
-    }
+    fun 上报诊断快照(): String = runCatching {
+        val 快照 = 诊断库.生成诊断快照()
+        诊断库.落盘快照()
+        快照.转为多行().take(1000)
+    }.getOrElse { 异常 -> "诊断采集失败:" + (异常.message?.take(200) ?: "未知错误") }
 
     // 启动诊断采样 ， 已启动直接返回 。
     private fun 启动诊断采样() {

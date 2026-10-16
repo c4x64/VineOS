@@ -18,11 +18,7 @@ class 用户态回退 @Inject constructor(private val 虚拟机管理: VineVMMan
 
     fun 是否可用(): Boolean = 虚拟机管理.hostSupportsProot() || 内置程序存在()
 
-    fun 构造命令(
-        用户态程序: String,
-        根文件目录: String,
-        实例数据目录: String,
-    ): List<String> {
+    fun 构造命令(用户态程序: String, 根文件目录: String, 实例数据目录: String): List<String> {
         val 命令 = mutableListOf(
             用户态程序,
             "-r", 根文件目录,

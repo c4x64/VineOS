@@ -8,11 +8,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.jvm.Volatile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlin.jvm.Volatile
 
 /**
  * 主机客户剪贴板双向共享桥接器（真实实现）。
@@ -26,16 +26,16 @@ import kotlin.jvm.Volatile
  * 全部链路均为真实文件读写加轮询同步加指纹去重，均为完整实现。
  */
 @Singleton
-class 剪贴板桥接器 @Inject constructor(
-    @ApplicationContext private val 应用上下文: Context,
-    private val 虚拟机管理: VineVMManager,
-) {
+class 剪贴板桥接器 @Inject constructor(@ApplicationContext private val 应用上下文: Context, private val 虚拟机管理: VineVMManager) {
     private val 系统剪贴板: ClipboardManager? = 应用上下文.getSystemService(ClipboardManager::class.java)
     private val 文件交换: 文件交换器 = 文件交换器()
     private val 历史库: 历史记录库 = 历史记录库()
     private val 后台域 = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     @Volatile private var 上次推送指纹: Long? = null
+
     @Volatile private var 上次推送文本: String? = null
+
     private val 实例去重表 = HashMap<String, Long>()
     private val 实例根目录表 = HashMap<String, String>()
     private val 连续空轮询计数 = HashMap<String, Int>()

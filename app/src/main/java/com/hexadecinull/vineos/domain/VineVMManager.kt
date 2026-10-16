@@ -4,16 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.content.ContextCompat
+import com.hexadecinull.vineos.backend.用户态回退
+import com.hexadecinull.vineos.backend.虚拟化框架后端
 import com.hexadecinull.vineos.data.models.AbiCompat
 import com.hexadecinull.vineos.data.models.ROMImage
 import com.hexadecinull.vineos.data.models.VMInstance
 import com.hexadecinull.vineos.data.models.VMStatus
 import com.hexadecinull.vineos.native.VineRuntime
 import com.hexadecinull.vineos.service.VineService
-import com.hexadecinull.vineos.backend.用户态回退
-import com.hexadecinull.vineos.backend.虚拟化框架后端
-import com.hexadecinull.vineos.网络.网络命名空间管理器
 import com.hexadecinull.vineos.安全.许可证门禁
+import com.hexadecinull.vineos.网络.网络命名空间管理器
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Provider
@@ -42,6 +42,7 @@ class VineVMManager @Inject constructor(
 
     private val handles = mutableMapOf<String, Long>()
     private val statusFlows = mutableMapOf<String, MutableStateFlow<VMStatus>>()
+
     // 启动路径说明 ： 每个实例最近一次启动走过的回退链 ， 如实记录每级探测结果 。
     private val _启动路径说明 = MutableStateFlow<Map<String, String>>(emptyMap())
     val 启动路径说明: StateFlow<Map<String, String>> = _启动路径说明.asStateFlow()
@@ -228,11 +229,9 @@ class VineVMManager @Inject constructor(
         return VineRuntime.pullGuestClipboard(handle)
     }
 
-    fun snapshot(instance: VMInstance, name: String): Boolean =
-        VineRuntime.snapshotInstance(instance.storagePath, name)
+    fun snapshot(instance: VMInstance, name: String): Boolean = VineRuntime.snapshotInstance(instance.storagePath, name)
 
-    fun restoreSnapshot(instance: VMInstance, name: String): Boolean =
-        VineRuntime.restoreSnapshot(instance.storagePath, name)
+    fun restoreSnapshot(instance: VMInstance, name: String): Boolean = VineRuntime.restoreSnapshot(instance.storagePath, name)
 
     fun hostSupportsProot(): Boolean = runCatching { VineRuntime.hostSupportsProot() }.getOrDefault(false)
 
