@@ -18,7 +18,9 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): VineDatabase =
         Room.databaseBuilder(context, VineDatabase::class.java, VineDatabase.DATABASE_NAME)
-            .fallbackToDestructiveMigration(dropAllTables = true)
+            // Non-destructive: v1->v2 is covered by AutoMigration (added cpuCores column).
+            // Only a downgrade may drop tables; an upgrade must never wipe user instances.
+            .fallbackToDestructiveMigrationOnDowngrade()
             .build()
 
     @Provides

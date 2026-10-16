@@ -127,3 +127,7 @@ proguard/
 *.orig
 nbproject/
 nbandroid/
+
+# Local autonomous agent loop (never committed)
+agents.md
+.agents/

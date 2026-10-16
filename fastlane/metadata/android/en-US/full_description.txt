@@ -1,0 +1,9 @@
+VineOS runs a complete, isolated Android OS inside your existing device - its own init, Zygote, SurfaceFlinger and more. You get a real second phone inside your phone.
+
+Highlights:
+- 100% free, open source (GPL-3.0), no ads, no telemetry
+- 32-bit apps on arm64-only phones via QEMU user-mode emulation
+- Multiple ROMs (7.1, 9, 11, 12) and multiple simultaneous instances
+- Material You UI, per-instance resource limits, snapshots
+
+Beta: first bootable ROM is in progress; daily driver readiness varies by device.

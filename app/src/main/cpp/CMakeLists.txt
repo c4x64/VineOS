@@ -27,11 +27,51 @@ endif()
 set(VINE_SOURCES
     vine_runtime.cpp
     container/namespace_manager.cpp
+    container/容器监控器.cpp
+    container/资源调度器.cpp
+    container/健康检查器.cpp
+    container/日志采集器.cpp
+    container/网络隔离器.cpp
+    container/挂载管理器.cpp
+    container/容器编排器.cpp
     qemu_bridge/qemu_launcher.cpp
     display/framebuffer_bridge.cpp
+    display/帧率统计.cpp
+    display/色彩管理.cpp
+    display/多窗口合成.cpp
+    display/旋转缩放.cpp
+    display/故障自愈.cpp
+    display/渲染循环.cpp
     input/uinput_bridge.cpp
+    input/输入事件写入器.cpp
+    input/键盘映射扩展.cpp
+    input/多点触控增强.cpp
+    input/触控手势识别.cpp
+    input/手柄支持.cpp
+    input/输入设备管理.cpp
+    input/采样诊断追踪.cpp
     utils/vine_utils.cpp
+    utils/原子写入器.cpp
+    utils/路径规范化器.cpp
+    utils/进程执行器.cpp
+    utils/哈希校验器.cpp
+    utils/沙箱检查器.cpp
+    utils/签名校验器.cpp
+    utils/安全桥接.cpp
     diagnostics/namespace_probe.cpp
+    diagnostics/性能采样器.cpp
+    diagnostics/内存分析器.cpp
+    diagnostics/线程转储器.cpp
+    diagnostics/错误聚合器.cpp
+    diagnostics/上报队列.cpp
+    diagnostics/日志中心.cpp
+    diagnostics/落盘管理器.cpp
+    diagnostics/系统探针集.cpp
+    diagnostics/诊断桥接.cpp
+    network/网络原生辅助.cpp
+    network/流量探针.cpp
+    storage/快照原生.cpp
+    storage/覆盖层原生.cpp
 )
 
 add_library(vine_runtime SHARED ${VINE_SOURCES})
@@ -44,6 +84,8 @@ target_include_directories(vine_runtime PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/input
     ${CMAKE_CURRENT_SOURCE_DIR}/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/diagnostics
+    ${CMAKE_CURRENT_SOURCE_DIR}/network
+    ${CMAKE_CURRENT_SOURCE_DIR}/storage
 )
 
 find_library(log-lib     log)

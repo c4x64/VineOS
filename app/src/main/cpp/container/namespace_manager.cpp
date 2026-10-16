@@ -12,6 +12,9 @@
 #include <sys/wait.h>
 #include <sys/sysmacros.h>
 #include <sys/resource.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 #include <linux/loop.h>
 #include <unordered_map>
 #include <sys/syscall.h>
@@ -62,6 +65,8 @@ bool Container::start() {
         return false;
     }
     if (!mount_rootfs()) { status_ = ContainerStatus::ERROR; return false; }
+    if (!setup_data_overlay()) { teardown_mounts(); status_ = ContainerStatus::ERROR; return false; }
+    if (!setup_magisk()) { VINE_LOGW("Magisk setup skipped for %s", config_.instance_id.c_str()); }
     if (!setup_bind_mounts()) { teardown_mounts(); status_ = ContainerStatus::ERROR; return false; }
     if (!setup_dev_nodes()) { teardown_mounts(); status_ = ContainerStatus::ERROR; return false; }
 
@@ -137,6 +142,128 @@ bool Container::mount_rootfs() {
             return false;
         }
     }
+    return true;
+}
+
+bool Container::setup_data_overlay() {
+    // Writable /data via overlayfs: lower = ROM's /data, upper = <instance>/data/upper,
+    // work = <instance>/data/work, merged at <rootfs_mnt>/data. Falls back to a plain
+    // bind mount of <instance>/data when the host kernel lacks overlay support.
+    const std::string data_dir = config_.instance_path + "/data";
+    const std::string upper = data_dir + "/upper";
+    const std::string work = data_dir + "/work";
+    const std::string target = config_.rootfs_mount_path + "/data";
+    mkdirs(data_dir); mkdirs(upper); mkdirs(work); mkdirs(target);
+
+    const std::string lower = config_.rootfs_mount_path + "/data";
+    // Self-overlay guard: lower == target is an invalid overlay mount (EBUSY/loop).
+    // The ROM's /data content already lives at target after mount_rootfs, so there is
+    // no separate lower baseline available here; skip the overlay attempt and use the
+    // bind-mount fallback instead of issuing a mount the kernel must reject.
+    const bool 自覆盖 = (lower == target);
+    if (!自覆盖) {
+        std::string opts = "lowerdir=" + lower + ",upperdir=" + upper + ",workdir=" + work;
+        if (mount("overlay", target.c_str(), "overlay", MS_RELATIME, opts.c_str()) == 0) {
+            VINE_LOGI("overlayfs /data mounted for %s", config_.instance_id.c_str());
+            return true;
+        }
+        VINE_LOGW("overlayfs /data failed (%s), falling back to bind mount", strerror(errno));
+    } else {
+        VINE_LOGW("overlay lower==target for %s, skipping overlay mount (self-mount invalid)", config_.instance_id.c_str());
+    }
+    if (mount(data_dir.c_str(), target.c_str(), nullptr, MS_BIND, nullptr) == 0) return true;
+    VINE_LOGE_ERRNO("bind-mount /data fallback");
+    return false;
+}
+
+bool Container::setup_magisk() {
+    if (!config_.enable_magisk) return true;
+    // Verified-payload staging: copy a real host-provided Magisk binary into the guest.
+    // An empty placeholder file proves nothing and would make the "rooted" flag a lie,
+    // so without a verified payload we remove any placeholder file, revert the claim (return false),
+    // and let start() log "Magisk setup skipped" so the guest boots honestly unrooted.
+    const std::string 客户目标 = config_.rootfs_mount_path + "/system/bin/vine-magisk";
+    const std::string 候选载荷[] = {
+        config_.instance_path + "/magisk/magisk",
+        std::string("/data/local/tmp/magisk"),
+        std::string("/system/bin/magisk"),
+    };
+    std::string 已验证载荷;
+    off_t 已验证大小 = 0;
+    for (const auto& 候选 : 候选载荷) {
+        struct stat 载荷状态{};
+        if (::stat(候选.c_str(), &载荷状态) != 0) continue;
+        if (!S_ISREG(载荷状态.st_mode)) continue;
+        if (载荷状态.st_size < 1024) {
+            VINE_LOGW("Magisk candidate %s too small (%lld bytes), ignored",
+                      候选.c_str(), (long long)载荷状态.st_size);
+            continue;
+        }
+        if (::access(候选.c_str(), R_OK) != 0) continue;
+        已验证载荷 = 候选;
+        已验证大小 = 载荷状态.st_size;
+        break;
+    }
+    if (已验证载荷.empty()) {
+        ::unlink(客户目标.c_str());
+        VINE_LOGW("Magisk payload not found/verified for %s; claim reverted, guest boots unrooted",
+                  config_.instance_id.c_str());
+        return false;
+    }
+    const int 源描述符 = ::open(已验证载荷.c_str(), O_RDONLY | O_CLOEXEC);
+    if (源描述符 < 0) {
+        VINE_LOGE_ERRNO("open(magisk payload)");
+        return false;
+    }
+    const int 目标描述符 = ::open(客户目标.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0755);
+    if (目标描述符 < 0) {
+        VINE_LOGE_ERRNO("open(guest vine-magisk)");
+        ::close(源描述符);
+        return false;
+    }
+    char 缓冲[8192];
+    ssize_t 已复制 = 0;
+    bool 复制成功 = true;
+    for (;;) {
+        const ssize_t 本次读取 = ::read(源描述符, 缓冲, sizeof(缓冲));
+        if (本次读取 < 0) {
+            if (errno == EINTR) continue;
+            VINE_LOGE_ERRNO("read(magisk payload)");
+            复制成功 = false;
+            break;
+        }
+        if (本次读取 == 0) break;
+        ssize_t 已写入 = 0;
+        while (已写入 < 本次读取) {
+            const ssize_t 本次写入 = ::write(目标描述符, 缓冲 + 已写入, (size_t)(本次读取 - 已写入));
+            if (本次写入 < 0) {
+                if (errno == EINTR) continue;
+                VINE_LOGE_ERRNO("write(guest vine-magisk)");
+                复制成功 = false;
+                break;
+            }
+            已写入 += 本次写入;
+        }
+        if (!复制成功) break;
+        已复制 += 本次读取;
+    }
+    ::close(源描述符);
+    if (复制成功) {
+        if (::fsync(目标描述符) != 0) {
+            VINE_LOGW("fsync(guest vine-magisk): %s", strerror(errno));
+        }
+    }
+    ::close(目标描述符);
+    struct stat 落盘状态{};
+    if (!复制成功 || ::stat(客户目标.c_str(), &落盘状态) != 0 || 落盘状态.st_size != 已验证大小) {
+        VINE_LOGE("Magisk payload copy verification failed for %s (expected %lld bytes)",
+                  config_.instance_id.c_str(), (long long)已验证大小);
+        ::unlink(客户目标.c_str());
+        return false;
+    }
+    ::chmod(客户目标.c_str(), 0755);
+    VINE_LOGI("Magisk payload verified (%lld bytes from %s) staged for %s",
+              (long long)已验证大小, 已验证载荷.c_str(), config_.instance_id.c_str());
     return true;
 }
 
@@ -259,6 +386,7 @@ bool Container::launch_init() {
 
     // Only pass androidboot.hardware if the ROM actually ships a matching init.<hw>.rc; otherwise it's a dangling import that init.rc silently skips, so there's no point pretending it does something
     const bool has_hw_rc = path_exists(config_.rootfs_mount_path + "/init.vine.rc");
+    const bool net_isolated = config_.enable_vpn_isolation;
 
     pid_t pid = fork();
     if (pid < 0) { VINE_LOGE_ERRNO("fork"); return false; }
@@ -269,7 +397,33 @@ bool Container::launch_init() {
         setrlimit(RLIMIT_NICE, &rl);
 
         int ns_flags = CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWUTS | CLONE_NEWIPC;
+        // Per-instance network isolation: separate net namespace when VPN isolation is
+        // requested. veth/NAT wiring and any tun-fd handoff must be completed by a
+        // privileged host helper (VineService) from the parent namespace; the child here
+        // only isolates and brings up loopback so the guest has a functional lo.
+        // Failure to unshare fails the container (fail-closed) rather than silently
+        // running the guest in the shared host netns.
+        if (net_isolated) ns_flags |= CLONE_NEWNET;
         if (unshare(ns_flags) != 0) { VINE_LOGE_ERRNO("unshare"); _exit(1); }
+
+        if (net_isolated) {
+            const int 回环套接字 = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+            if (回环套接字 >= 0) {
+                struct ifreq 回环请求{};
+                strncpy(回环请求.ifr_name, "lo", IFNAMSIZ - 1);
+                if (ioctl(回环套接字, SIOCGIFFLAGS, &回环请求) == 0) {
+                    回环请求.ifr_flags |= (short)(IFF_UP | IFF_RUNNING);
+                    if (ioctl(回环套接字, SIOCSIFFLAGS, &回环请求) != 0) {
+                        VINE_LOGW("netns lo up failed: %s", strerror(errno));
+                    }
+                } else {
+                    VINE_LOGW("netns lo flags query failed: %s", strerror(errno));
+                }
+                close(回环套接字);
+            } else {
+                VINE_LOGW("netns lo socket failed: %s", strerror(errno));
+            }
+        }
 
         const std::string hostname = "vine-" + config_.instance_id.substr(0, 8);
         sethostname(hostname.c_str(), hostname.size());
@@ -319,7 +473,8 @@ void Container::teardown_mounts() {
     const std::string root = config_.rootfs_mount_path;
     const char* suffixes[] = {
         "/sys/fs/cgroup", "/dev/pts", "/dev/shm", "/dev",
-        "/sys", "/proc", "/system/bin/qemu-arm",
+        "/sys", "/proc", "/system/bin/qemu-arm", "/system/bin/vine-magisk",
+        "/data",
     };
     for (const char* s : suffixes) {
         umount2((root + s).c_str(), MNT_DETACH);

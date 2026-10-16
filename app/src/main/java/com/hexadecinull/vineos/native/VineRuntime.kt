@@ -13,6 +13,8 @@ object VineRuntime {
 
     external fun createInstance(instanceId: String, romImagePath: String, storageMb: Int): String?
 
+    external fun setInstanceFlags(instanceId: String, enableMagisk: Boolean, enableVpnIsolation: Boolean)
+
     external fun startInstance(instanceId: String, instancePath: String, ramMb: Int, cpuCores: Int): Long
 
     external fun stopInstance(instanceHandle: Long)
@@ -41,7 +43,28 @@ object VineRuntime {
 
     external fun sendTouchEvent(instanceHandle: Long, action: Int, x: Float, y: Float)
 
+    external fun sendMultitouchEvent(
+        instanceHandle: Long,
+        slots: IntArray,
+        xs: FloatArray,
+        ys: FloatArray,
+        actives: BooleanArray,
+        count: Int,
+    )
+
     external fun sendKeyEvent(instanceHandle: Long, keycode: Int, down: Boolean)
+
+    external fun pushHostClipboard(instanceHandle: Long, text: String): Boolean
+
+    external fun pullGuestClipboard(instanceHandle: Long): String
+
+    external fun snapshotInstance(instancePath: String, snapshotName: String): Boolean
+
+    external fun restoreSnapshot(instancePath: String, snapshotName: String): Boolean
+
+    external fun hostSupportsProot(): Boolean
+
+    external fun hostSupportsAvf(): Boolean
 
     external fun getDiagnostics(instanceHandle: Long): String
 

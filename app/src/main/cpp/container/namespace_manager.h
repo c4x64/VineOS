@@ -19,6 +19,8 @@ struct ContainerConfig {
     int cpu_cores = 0;               // 0 = unlimited, otherwise a cgroup CPU quota
     bool needs_qemu_32bit = false;  // True when host lacks AArch32 support
     std::string qemu_arm_path;      // Path to the static qemu-arm binary
+    bool enable_magisk = false;     // Bind a Magisk stub into the guest when true
+    bool enable_vpn_isolation = false; // Put the guest in its own network namespace
 };
 
 enum class ContainerStatus {
@@ -69,6 +71,8 @@ private:
     int framebuffer_fd_ = -1;
 
     bool mount_rootfs();
+    bool setup_data_overlay();
+    bool setup_magisk();
     bool setup_bind_mounts();
     bool setup_dev_nodes();
     bool setup_binfmt_misc();

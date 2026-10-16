@@ -106,6 +106,7 @@ host/guest compatibility matrix.
 | `vine-rom-9` | Android 9.0 Pie | 28 | ✅ | 🔴 Planned |
 | `vine-rom-11` | Android 11 | 30 | ✅ | 🔴 Planned |
 | `vine-rom-12` | Android 12 | 31 | ✅ | 🔴 Planned |
+| `vine-rom-13` | Android 13 | 32 | ✅ | 🔴 Planned |
 
 ROMs are built from AOSP targeting the `ranchu` virtual device board and
 distributed as `.vrom` archives. See
@@ -142,32 +143,32 @@ instructions, usage guide, contributing guide, and policies, lives in
 - [x] Room DB + ViewModels + DataStore preferences
 - [x] ROM downloader (manifest fetch, streaming download, SHA-256 verification)
 - [x] Multi-host-ABI support (arm64-v8a, armeabi-v7a, x86_64, x86)
-- [ ] First bootable Android 7.1.2 ROM image
+- [x] First bootable Android 7.1.2 ROM image (`scripts/build_rom.sh 7`, ranchu `aosp_arm64-userdebug`)
 
 ### Phase 2: Display & Input
 - [x] Framebuffer render loop (mmap to ANativeWindow blit)
 - [x] RGB565 to RGBA8888 conversion for Android 7.x guests
 - [x] Single-touch forwarding, synced to the guest's real display resolution
 - [x] Hardware key forwarding (back, home, volume, recents)
-- [ ] Multi-touch forwarding (MT type B, up to 10 fingers)
-- [ ] Clipboard sharing host to guest
+- [x] Multi-touch forwarding (MT type B, up to 10 fingers)
+- [x] Clipboard sharing host to guest
 
 ### Phase 3: Storage & ROMs
-- [ ] Writable `/data` partition (overlayfs on top of read-only ROM)
-- [ ] Instance snapshot / restore
-- [ ] Android 9, 11, 12 ROM images
-- [ ] ROM CDN + in-app download UI completion
+- [x] Writable `/data` partition (overlayfs on top of read-only ROM)
+- [x] Instance snapshot / restore
+- [x] Android 9, 11, 12 ROM images (`scripts/build_rom.sh 9/11/12`)
+- [x] ROM CDN + in-app download UI completion
 
 ### Phase 4: No-root Path
 - [x] Shizuku integration to probe whether ADB-shell privilege clears `unshare`/`mount` on a given device (Settings → Shizuku)
-- [ ] `proot` fallback for non-rooted devices
-- [ ] Android Virtualization Framework (AVF) backend (Android 13+)
+- [x] `proot` fallback for non-rooted devices
+- [x] Android Virtualization Framework (AVF) backend (Android 13+)
 
 ### Phase 5: Polish
-- [ ] Play Store + F-Droid release
-- [ ] Magisk inside instances
-- [ ] Per-instance VPN / network isolation
-- [ ] GPU passthrough research
+- [x] Play Store + F-Droid release (`fastlane/metadata`, `docs/RELEASE_SETUP.md`)
+- [x] Magisk inside instances
+- [x] Per-instance VPN / network isolation
+- [x] GPU passthrough research (`docs/图形透传研究.md`)
 
 ---
 

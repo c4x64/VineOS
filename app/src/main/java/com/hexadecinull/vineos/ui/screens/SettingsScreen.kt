@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.hexadecinull.vineos.BuildConfig
 import com.hexadecinull.vineos.shizuku.ShizukuStatus
 import com.hexadecinull.vineos.ui.viewmodel.ProbeState
+import com.hexadecinull.vineos.ui.viewmodel.快照存储概览
 
 data class AppSettings(
     val dynamicColor: Boolean = true,
@@ -38,6 +39,9 @@ fun SettingsScreen(
     probeState: ProbeState,
     onRunProbe: () -> Unit,
     modifier: Modifier = Modifier,
+    // 快照存储概览 ： 设置页快照维护入口 ， 默认空概览保持旧调用方兼容 。
+    快照概览: 快照存储概览 = 快照存储概览(),
+    on刷新快照概览: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -123,13 +127,47 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection(title = "Shizuku") {
-                ShizukuSettingsContent(
+            SettingsSection(title = "Shizuku") {                ShizukuSettingsContent(
                     status = shizukuStatus,
                     onRequestPermission = onRequestShizukuPermission,
                     probeState = probeState,
                     onRunProbe = onRunProbe,
                 )
+            }
+
+            SettingsSection(title = "Snapshots") {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        Icon(Icons.Outlined.Save, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Snapshot storage", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                if (快照概览.扫描中) "Scanning…" else "${快照概览.快照个数} snapshots · ${快照概览.占用显示()}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        FilledTonalButton(onClick = on刷新快照概览, enabled = !快照概览.扫描中) {
+                            Text(if (快照概览.扫描中) "Scanning…" else "Refresh")
+                        }
+                    }
+                    if (快照概览.提示.isNotBlank()) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            快照概览.提示,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(
+                        "Per-instance create / restore / delete lives on the instance detail screen.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
 
             SettingsSection(title = "About") {

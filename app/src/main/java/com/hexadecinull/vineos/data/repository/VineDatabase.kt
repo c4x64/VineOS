@@ -1,5 +1,6 @@
 package com.hexadecinull.vineos.data.repository
 
+import androidx.room.AutoMigration
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Delete
@@ -54,7 +55,8 @@ interface VMInstanceDao {
 
 @Database(
     entities = [VMInstance::class],
-    version = 1,
+    version = 2,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
     exportSchema = true,
 )
 @TypeConverters(VineConverters::class)

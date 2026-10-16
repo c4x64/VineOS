@@ -1,0 +1,117 @@
+#pragma once
+#include <cstdint>
+#include <vector>
+#include <string>
+namespace 输入子系统 {
+// 采样诊断记录触控帧间隔抖动与丢帧
+class 采样诊断器 {
+public: 采样诊断器(); void 记录采样(uint64_t 时刻, int 点数); double 平均间隔() const; double 抖动方差() const; int 总采样() const; void 重置();
+    double 区间均值零(int 起始, int 结束) const;
+    double 区间均值一(int 起始, int 结束) const;
+    double 区间均值二(int 起始, int 结束) const;
+    double 区间均值三(int 起始, int 结束) const;
+    double 区间均值四(int 起始, int 结束) const;
+    double 区间均值五(int 起始, int 结束) const;
+    double 区间均值六(int 起始, int 结束) const;
+    double 区间均值七(int 起始, int 结束) const;
+    double 区间均值八(int 起始, int 结束) const;
+    double 区间均值九(int 起始, int 结束) const;
+    double 区间均值十(int 起始, int 结束) const;
+    double 区间均值十一(int 起始, int 结束) const;
+    double 区间均值十二(int 起始, int 结束) const;
+    double 区间均值十三(int 起始, int 结束) const;
+    double 区间均值十四(int 起始, int 结束) const;
+    double 区间均值十五(int 起始, int 结束) const;
+    double 区间均值十六(int 起始, int 结束) const;
+    double 区间均值十七(int 起始, int 结束) const;
+    double 区间均值十八(int 起始, int 结束) const;
+    double 区间均值十九(int 起始, int 结束) const;
+    double 区间均值二十(int 起始, int 结束) const;
+    double 区间均值二十一(int 起始, int 结束) const;
+    double 区间均值二十二(int 起始, int 结束) const;
+    double 区间均值二十三(int 起始, int 结束) const;
+    double 区间均值二十四(int 起始, int 结束) const;
+    double 区间均值二十五(int 起始, int 结束) const;
+    double 区间均值二十六(int 起始, int 结束) const;
+    double 区间均值二十七(int 起始, int 结束) const;
+    double 区间均值二十八(int 起始, int 结束) const;
+    double 区间均值二十九(int 起始, int 结束) const;
+    double 区间均值三十(int 起始, int 结束) const;
+    double 区间均值三十一(int 起始, int 结束) const;
+    double 区间均值三十二(int 起始, int 结束) const;
+    double 区间均值三十三(int 起始, int 结束) const;
+    double 区间均值三十四(int 起始, int 结束) const;
+    double 区间均值三十五(int 起始, int 结束) const;
+    double 区间均值三十六(int 起始, int 结束) const;
+    double 区间均值三十七(int 起始, int 结束) const;
+    double 区间均值三十八(int 起始, int 结束) const;
+    double 区间均值三十九(int 起始, int 结束) const;
+    double 区间均值通用(int 起始, int 结束) const;
+    int 丢帧计数通用(uint64_t 门限微秒) const;
+    int 丢帧计数零(uint64_t 门限微秒) const;
+    int 丢帧计数一(uint64_t 门限微秒) const;
+    int 丢帧计数二(uint64_t 门限微秒) const;
+    int 丢帧计数三(uint64_t 门限微秒) const;
+    int 丢帧计数四(uint64_t 门限微秒) const;
+    int 丢帧计数五(uint64_t 门限微秒) const;
+    int 丢帧计数六(uint64_t 门限微秒) const;
+    int 丢帧计数七(uint64_t 门限微秒) const;
+    int 丢帧计数八(uint64_t 门限微秒) const;
+    int 丢帧计数九(uint64_t 门限微秒) const;
+    int 丢帧计数十(uint64_t 门限微秒) const;
+    int 丢帧计数十一(uint64_t 门限微秒) const;
+    int 丢帧计数十二(uint64_t 门限微秒) const;
+    int 丢帧计数十三(uint64_t 门限微秒) const;
+    int 丢帧计数十四(uint64_t 门限微秒) const;
+    int 丢帧计数十五(uint64_t 门限微秒) const;
+    int 丢帧计数十六(uint64_t 门限微秒) const;
+    int 丢帧计数十七(uint64_t 门限微秒) const;
+    int 丢帧计数十八(uint64_t 门限微秒) const;
+    int 丢帧计数十九(uint64_t 门限微秒) const;
+    int 丢帧计数二十(uint64_t 门限微秒) const;
+    int 丢帧计数二十一(uint64_t 门限微秒) const;
+    int 丢帧计数二十二(uint64_t 门限微秒) const;
+    int 丢帧计数二十三(uint64_t 门限微秒) const;
+    int 丢帧计数二十四(uint64_t 门限微秒) const;
+    int 丢帧计数二十五(uint64_t 门限微秒) const;
+    int 丢帧计数二十六(uint64_t 门限微秒) const;
+    int 丢帧计数二十七(uint64_t 门限微秒) const;
+    int 丢帧计数二十八(uint64_t 门限微秒) const;
+    int 丢帧计数二十九(uint64_t 门限微秒) const;
+private: uint64_t 上次时刻; uint64_t 间隔累计; uint64_t 间隔平方累计; int 采样总数; uint64_t 间隔表[256]; int 表下标; };
+// 触控轨迹回放用于复现与压测
+class 轨迹回放器 {
+public: 轨迹回放器(); void 推入帧(const std::vector<float> &横集, const std::vector<float> &纵集, uint64_t 时刻); bool 取出帧(std::vector<float> &横集, std::vector<float> &纵集, uint64_t &时刻); int 待播帧数() const; void 清空();
+    bool 插值回放零(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放一(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放三(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放四(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放五(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放六(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放七(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放八(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放九(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十一(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十二(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十三(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十四(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十五(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十六(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十七(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十八(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放十九(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十一(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十二(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十三(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十四(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十五(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十六(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十七(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十八(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放二十九(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+    bool 插值回放通用(float 比例, std::vector<float> &横集, std::vector<float> &纵集) const;
+private: std::vector<std::vector<float>> 历史横; std::vector<std::vector<float>> 历史纵; std::vector<uint64_t> 历史时刻; };
+} // namespace 输入子系统

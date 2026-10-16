@@ -49,6 +49,7 @@ import com.hexadecinull.vineos.ui.viewmodel.HomeViewModel
 import com.hexadecinull.vineos.ui.viewmodel.ROMsViewModel
 import com.hexadecinull.vineos.ui.viewmodel.SettingsViewModel
 import com.hexadecinull.vineos.ui.viewmodel.ShizukuViewModel
+import com.hexadecinull.vineos.ui.viewmodel.快照存储概览
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -59,6 +60,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsVm: SettingsViewModel = hiltViewModel()
             val settings by settingsVm.settings.collectAsStateWithLifecycle()
+            // 快照存储概览 ： 设置页展示全局快照占用 ， 真实扫描文件系统 。
+            val 快照概览 by settingsVm.快照概览.collectAsStateWithLifecycle()
 
             LaunchedEffect(settings.keepScreenOn) {
                 if (settings.keepScreenOn) {
@@ -68,10 +71,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            LaunchedEffect(Unit) {
+                // 首次进入即扫描一次快照占用 ， 供设置页直接展示 。
+                settingsVm.刷新快照概览()
+            }
+
             VineOSTheme(dynamicColor = settings.dynamicColor) {
                 VineOSApp(
                     settings = settings,
                     onSettingsChange = { settingsVm.update(it) },
+                    快照概览 = 快照概览,
+                    on刷新快照概览 = { settingsVm.刷新快照概览() },
                 )
             }
         }
@@ -79,7 +89,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun VineOSApp(settings: AppSettings, onSettingsChange: (AppSettings) -> Unit) {
+fun VineOSApp(
+    settings: AppSettings,
+    onSettingsChange: (AppSettings) -> Unit,
+    // 快照存储概览 ： 设置页快照维护入口 ， 默认空概览保持旧调用方兼容 。
+    快照概览: 快照存储概览 = 快照存储概览(),
+    on刷新快照概览: () -> Unit = {},
+) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -146,6 +162,8 @@ fun VineOSApp(settings: AppSettings, onSettingsChange: (AppSettings) -> Unit) {
                     probeState = probeState,
                     onRunProbe = shizukuVm::runProbe,
                     modifier = Modifier.fillMaxSize(),
+                    快照概览 = 快照概览,
+                    on刷新快照概览 = on刷新快照概览,
                 )
             }
 

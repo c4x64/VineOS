@@ -20,6 +20,7 @@ data class VMInstance(
     val storageMb: Int = 4096,
     val androidVersionDisplay: String,
     val isRooted: Boolean = false,
+    val enableVpnIsolation: Boolean = false,
     val iconEmoji: String = "🟢",
 )
 

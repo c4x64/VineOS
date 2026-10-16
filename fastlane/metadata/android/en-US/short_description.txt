@@ -1,0 +1,2 @@
+VineOS - Android on Android VM
+Run a full isolated Android guest inside your device. Open source, ad-free, with 32-bit support on arm64-only hardware.
