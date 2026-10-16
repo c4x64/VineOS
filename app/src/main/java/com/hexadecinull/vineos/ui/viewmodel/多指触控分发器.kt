@@ -1,13 +1,13 @@
 package com.hexadecinull.vineos.ui.viewmodel
 
 import android.view.MotionEvent
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * 多指触控分发器。
@@ -86,52 +86,74 @@ data class 分发结果(
 class 多指触控分发器 {
     /** 最多支持的并发触控路数。 */
     val 最多槽位数: Int = 10
+
     /** 显示区域宽度，用于钳制。 */
     var 显示宽度: Float = 1920f
+
     /** 显示区域高度，用于钳制。 */
     var 显示高度: Float = 1080f
+
     /** 去抖阈值，小于该距离的移动视为静止。 */
     var 去抖阈值: Float = 1.5f
+
     /** 快照最小发布间隔毫秒，节流重组风暴。 */
     var 最小发布间隔: Long = 32L
+
     /** 内部锁对象。 */
     private val 内部锁 = Any()
+
     /** 指针编号到槽位的映射。 */
     private val 编号到槽位 = LinkedHashMap<Int, Int>(10)
+
     /** 槽位到指针编号的反向映射。 */
     private val 槽位到编号 = LinkedHashMap<Int, Int>(10)
+
     /** 槽位占用表，O(1) 分配。 */
     private val 槽位占用表 = BooleanArray(10)
+
     /** 空闲槽栈，栈顶优先分配。 */
     private val 空闲槽栈 = ArrayDeque<Int>()
+
     /** 触控点详情表。 */
     private val 触控详情 = LinkedHashMap<Int, 触控点信息>(10)
+
     /** 上一帧横坐标缓存。 */
     private val 上帧横坐标 = FloatArray(10)
+
     /** 上一帧纵坐标缓存。 */
     private val 上帧纵坐标 = FloatArray(10)
+
     /** 上帧时刻缓存。 */
     private var 上帧时刻: Long = 0L
+
     /** 上次快照发布时刻。 */
     private var 上次发布时刻: Long = 0L
+
     /** 上次发布指纹，去重用。 */
     private var 上次发布指纹: Long = 0L
+
     /** 累计分发帧数。 */
     var 累计帧数: Long = 0L
         private set
+
     /** 累计按入次数。 */
     var 累计按入: Long = 0L
         private set
+
     /** 累计抬起次数。 */
     var 累计抬起: Long = 0L
         private set
+
     /** 累计钳制次数。 */
     var 累计钳制: Long = 0L
         private set
+
     /** 快照状态流，供界面订阅。 */
     private val 快照流内部 = MutableStateFlow<槽位快照?>(null)
+
     /** 对外只读快照流。 */
     val 快照流: StateFlow<槽位快照?> = 快照流内部.asStateFlow()
+
     /** 最近一次分发结果缓存。 */
     var 最近结果: 分发结果? = null
         private set
@@ -421,9 +443,7 @@ class 多指触控分发器 {
      * @param 上帧 上帧坐标。
      * @return 过滤后坐标。
      */
-    fun 去抖过滤(槽位: Int, 当前: Float, 上帧: Float): Float {
-        return if (abs(当前 - 上帧) < 去抖阈值 && 上帧 != 0f) 上帧 else 当前
-    }
+    fun 去抖过滤(槽位: Int, 当前: Float, 上帧: Float): Float = if (abs(当前 - 上帧) < 去抖阈值 && 上帧 != 0f) 上帧 else 当前
 
     /**
      * 查询存活触控数。
@@ -510,8 +530,9 @@ class 多指触控分发器 {
     fun 批量查询槽位状态(序号表: List<Int>): List<触控点信息?> {
         synchronized(内部锁) {
             return 序号表.map { 槽 ->
-                if (槽 !in 0 until 最多槽位数) null
-                else {
+                if (槽 !in 0 until 最多槽位数) {
+                    null
+                } else {
                     val 编号 = 槽位到编号[槽] ?: return@map null
                     触控详情[编号]
                 }

@@ -8,118 +8,135 @@ import kotlinx.coroutines.flow.*
 // 文件功能：诊断仓储——统一采集调度、文件落盘、时间窗查询、聚合展示数据源
 // 说明：标识一律中文，系统 API（File、Flow、Coroutine）保持英文。
 data class 诊断快照(val 时刻: Long, val 性能摘要: String, val 内存摘要: String, val 线程摘要: String, val 错误摘要: String, val 系统摘要: String) {
-  fun 转为多行(): String {
-    return buildString {
-      appendLine("时刻=$时刻")
-      appendLine("[性能]$性能摘要")
-      appendLine("[内存]$内存摘要")
-      appendLine("[线程]$线程摘要")
-      appendLine("[错误]$错误摘要")
-      appendLine("[系统]$系统摘要")
+    fun 转为多行(): String = buildString {
+        appendLine("时刻=$时刻")
+        appendLine("[性能]$性能摘要")
+        appendLine("[内存]$内存摘要")
+        appendLine("[线程]$线程摘要")
+        appendLine("[错误]$错误摘要")
+        appendLine("[系统]$系统摘要")
     }
-  }
 }
 data class 仓储配置(val 根目录: File, val 采样间隔毫秒: Long = 2000L, val 自动采样: Boolean = false)
 class 诊断仓储(
-  private val 性能器: 性能采样器 = 性能采样器(),
-  private val 内存器: 内存快照器 = 内存快照器(),
-  private val 线程器: 线程转储采集器 = 线程转储采集器(),
-  private val 错误仓: 错误聚合仓 = 错误聚合仓(),
-  private val 上报管理: 上报队列管理 = 上报队列管理(),
-  private val 日志器: 日志查询器 = 日志查询器(),
+    private val 性能器: 性能采样器 = 性能采样器(),
+    private val 内存器: 内存快照器 = 内存快照器(),
+    private val 线程器: 线程转储采集器 = 线程转储采集器(),
+    private val 错误仓: 错误聚合仓 = 错误聚合仓(),
+    private val 上报管理: 上报队列管理 = 上报队列管理(),
+    private val 日志器: 日志查询器 = 日志查询器(),
 ) {
-  private val 作用域 = CoroutineScope(Dispatchers.IO + SupervisorJob())
-  private var 采集任务: Job? = null
-  private val _快照流 = MutableStateFlow<诊断快照?>(null)
-  val 快照流: StateFlow<诊断快照?> = _快照流.asStateFlow()
-  private var 配置: 仓储配置? = null
-  fun 配置仓储(新配置: 仓储配置) {
-    配置 = 新配置
-    新配置.根目录.mkdirs()
-    上报管理.落盘目录 = File(新配置.根目录, "上报")
-    上报管理.落盘目录?.mkdirs()
-  }
-  fun 采集内存快照(): 内存快照 {
-    val 快照 = 内存器.采集内存快照()
-    日志器.写入(日志等级.调试, "内存", 快照.转为日志行())
-    return 快照
-  }
-  fun 采集性能快照(): 性能采样点 {
-    val 点 = 性能器.采集一次()
-    日志器.写入(日志等级.调试, "性能", 点.转为日志行())
-    return 点
-  }
-  fun 采集线程转储(): 线程转储 {
-    val 转储 = 线程器.采集转储()
-    日志器.写入(日志等级.调试, "线程", "线程数=${转储.线程列表.size}")
-    return 转储
-  }
-  fun 上报错误(类别: String, 摘要: String, 堆栈: String): Long {
-    val 序号 = 错误仓.上报错误(类别, 摘要, 堆栈)
-    日志器.写入(日志等级.错误, 类别, 摘要)
-    上报管理.入队(类别, 摘要 + "\n" + 堆栈, 优先级 = 5)
-    return 序号
-  }
-  fun 生成诊断快照(): 诊断快照 {
-    val 性能 = try { 性能器.最新采样点()?.转为日志行() ?: 性能器.采集一次().转为日志行() } catch (e: Exception) { "性能采集失败:${e.message}" }
-    val 内存 = try { 内存器.采集内存快照().转为日志行() } catch (e: Exception) { "内存采集失败" }
-    val 线程 = try { val 转 = 线程器.采集转储(); "线程数=${转.线程列表.size} 运行=${转.运行中数量()}" } catch (e: Exception) { "线程采集失败" }
-    val 错误 = "记录=${错误仓.记录总数()} 分组=${错误仓.查询全部分组().size}"
-    val 系统 = 诊断原生桥.获取诊断摘要().take(500)
-    val 快照 = 诊断快照(System.currentTimeMillis(), 性能, 内存, 线程, 错误, 系统)
-    _快照流.value = 快照
-    return 快照
-  }
-  fun 启动自动采集(间隔毫秒: Long = 2000L): Job {
-    停止自动采集()
-    val 任务 = 作用域.launch {
-      while (isActive) {
-        try {
-          生成诊断快照()
-          落盘快照()
-        } catch (e: Exception) {
-        }
-        delay(间隔毫秒)
-      }
+    private val 作用域 = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var 采集任务: Job? = null
+    private val _快照流 = MutableStateFlow<诊断快照?>(null)
+    val 快照流: StateFlow<诊断快照?> = _快照流.asStateFlow()
+    private var 配置: 仓储配置? = null
+    fun 配置仓储(新配置: 仓储配置) {
+        配置 = 新配置
+        新配置.根目录.mkdirs()
+        上报管理.落盘目录 = File(新配置.根目录, "上报")
+        上报管理.落盘目录?.mkdirs()
     }
-    采集任务 = 任务
-    return 任务
-  }
-  fun 停止自动采集() {
-    采集任务?.cancel()
-    采集任务 = null
-  }
-  fun 落盘快照(): Boolean {
-    val 根 = 配置?.根目录 ?: return false
-    return try {
-      val 快照 = _快照流.value ?: 生成诊断快照()
-      val 文件 = File(根, "诊断快照.log")
-      if (文件.exists() && 文件.length() > 8*1024*1024) { val 旧 = File(根, "诊断快照.1.log"); if (旧.exists()) 旧.delete(); 文件.renameTo(旧) }
-      val 行 = 快照.转为多行().take(8192) + "----\n"
-      文件.appendText(行)
-      性能器.落盘到文件(File(根, "性能.csv"))
-      true
-    } catch (e: Exception) { false }
-  }
-  fun 查询性能窗口(起始: Long, 结束: Long): List<性能采样点> = 性能器.查询窗口(起始, 结束)
-  fun 查询错误热门(前几名: Int): List<错误分组> = 错误仓.查询热门(前几名)
-  fun 查询日志(条件: 日志查询条件): List<日志条目> = 日志器.查询(条件)
+    fun 采集内存快照(): 内存快照 {
+        val 快照 = 内存器.采集内存快照()
+        日志器.写入(日志等级.调试, "内存", 快照.转为日志行())
+        return 快照
+    }
+    fun 采集性能快照(): 性能采样点 {
+        val 点 = 性能器.采集一次()
+        日志器.写入(日志等级.调试, "性能", 点.转为日志行())
+        return 点
+    }
+    fun 采集线程转储(): 线程转储 {
+        val 转储 = 线程器.采集转储()
+        日志器.写入(日志等级.调试, "线程", "线程数=${转储.线程列表.size}")
+        return 转储
+    }
+    fun 上报错误(类别: String, 摘要: String, 堆栈: String): Long {
+        val 序号 = 错误仓.上报错误(类别, 摘要, 堆栈)
+        日志器.写入(日志等级.错误, 类别, 摘要)
+        上报管理.入队(类别, 摘要 + "\n" + 堆栈, 优先级 = 5)
+        return 序号
+    }
+    fun 生成诊断快照(): 诊断快照 {
+        val 性能 = try {
+            性能器.最新采样点()?.转为日志行() ?: 性能器.采集一次().转为日志行()
+        } catch (e: Exception) {
+            "性能采集失败:${e.message}"
+        }
+        val 内存 = try {
+            内存器.采集内存快照().转为日志行()
+        } catch (e: Exception) {
+            "内存采集失败"
+        }
+        val 线程 = try {
+            val 转 = 线程器.采集转储()
+            "线程数=${转.线程列表.size} 运行=${转.运行中数量()}"
+        } catch (e: Exception) {
+            "线程采集失败"
+        }
+        val 错误 = "记录=${错误仓.记录总数()} 分组=${错误仓.查询全部分组().size}"
+        val 系统 = 诊断原生桥.获取诊断摘要().take(500)
+        val 快照 = 诊断快照(System.currentTimeMillis(), 性能, 内存, 线程, 错误, 系统)
+        _快照流.value = 快照
+        return 快照
+    }
+    fun 启动自动采集(间隔毫秒: Long = 2000L): Job {
+        停止自动采集()
+        val 任务 = 作用域.launch {
+            while (isActive) {
+                try {
+                    生成诊断快照()
+                    落盘快照()
+                } catch (e: Exception) {
+                }
+                delay(间隔毫秒)
+            }
+        }
+        采集任务 = 任务
+        return 任务
+    }
+    fun 停止自动采集() {
+        采集任务?.cancel()
+        采集任务 = null
+    }
+    fun 落盘快照(): Boolean {
+        val 根 = 配置?.根目录 ?: return false
+        return try {
+            val 快照 = _快照流.value ?: 生成诊断快照()
+            val 文件 = File(根, "诊断快照.log")
+            if (文件.exists() && 文件.length() > 8 * 1024 * 1024) {
+                val 旧 = File(根, "诊断快照.1.log")
+                if (旧.exists()) 旧.delete()
+                文件.renameTo(旧)
+            }
+            val 行 = 快照.转为多行().take(8192) + "----\n"
+            文件.appendText(行)
+            性能器.落盘到文件(File(根, "性能.csv"))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+    fun 查询性能窗口(起始: Long, 结束: Long): List<性能采样点> = 性能器.查询窗口(起始, 结束)
+    fun 查询错误热门(前几名: Int): List<错误分组> = 错误仓.查询热门(前几名)
+    fun 查询日志(条件: 日志查询条件): List<日志条目> = 日志器.查询(条件)
 }
 fun 诊断仓储.通用辅助查询(关键字: String, 上限: Int = 50): List<日志条目> {
-  val 封顶 = 上限.coerceIn(1, 200)
-  val 截断键 = if (关键字.length <= 256)关键字 else 关键字.substring(0, 256)
-  val 条件 = 日志查询条件(最低 = 日志等级.调试, 关键字 = 截断键, 上限 = 封顶)
-  val 结果 = 查询日志(条件)
-  return if (结果.size > 封顶)结果.take(封顶) else 结果
+    val 封顶 = 上限.coerceIn(1, 200)
+    val 截断键 = if (关键字.length <= 256)关键字 else 关键字.substring(0, 256)
+    val 条件 = 日志查询条件(最低 = 日志等级.调试, 关键字 = 截断键, 上限 = 封顶)
+    val 结果 = 查询日志(条件)
+    return if (结果.size > 封顶)结果.take(封顶) else 结果
 }
 fun 诊断仓储.通用辅助统计(窗口毫秒: Long): String {
-  val 窗 = 窗口毫秒.coerceIn(1000L, 3600000L)
-  val 现 = System.currentTimeMillis()
-  val 聚合 = 查询性能窗口(现 - 窗, 现).map { it.全局使用率 }
-  if (聚合.isEmpty()) return "暂无样本"
-  val 均值 = 聚合.average()
-  val 最大 = 聚合.maxOrNull() ?: 0.0
-  return "均值=${"%.1f".format(均值*100)}% 最大=${"%.1f".format(最大*100)}%"
+    val 窗 = 窗口毫秒.coerceIn(1000L, 3600000L)
+    val 现 = System.currentTimeMillis()
+    val 聚合 = 查询性能窗口(现 - 窗, 现).map { it.全局使用率 }
+    if (聚合.isEmpty()) return "暂无样本"
+    val 均值 = 聚合.average()
+    val 最大 = 聚合.maxOrNull() ?: 0.0
+    return "均值=${"%.1f".format(均值 * 100)}% 最大=${"%.1f".format(最大 * 100)}%"
 }
 fun 诊断仓储.辅助查询日志1(关键字: String, 上限: Int = 50): List<日志条目> = 通用辅助查询(关键字, 上限)
 fun 诊断仓储.辅助统计性能1(窗口毫秒: Long): String = 通用辅助统计(窗口毫秒)
@@ -360,4 +377,3 @@ fun 诊断仓储.辅助统计性能79(窗口毫秒: Long): String = 通用辅助
 
 fun 诊断仓储.辅助查询日志80(关键字: String, 上限: Int = 50): List<日志条目> = 通用辅助查询(关键字, 上限)
 fun 诊断仓储.辅助统计性能80(窗口毫秒: Long): String = 通用辅助统计(窗口毫秒)
-

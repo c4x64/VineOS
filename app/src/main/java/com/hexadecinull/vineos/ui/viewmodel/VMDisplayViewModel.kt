@@ -26,8 +26,7 @@ class VMDisplayViewModel @Inject constructor(
     private val instanceRepo: InstanceRepository,
     // 剪贴板桥接器： 双向同步唯一入口 ， 为空时退化为直连虚拟机管理 。
     private val 剪贴板桥接: 剪贴板桥接器? = null,
-) :
-    ViewModel() {
+) : ViewModel() {
 
     var isBooting by mutableStateOf(false)
         private set
@@ -35,6 +34,7 @@ class VMDisplayViewModel @Inject constructor(
     private var instanceId: String? = null
     private var instanceHandle by mutableLongStateOf(0L)
     private var statusJob: Job? = null
+
     // 剪贴板防抖轮询 ： 去抖窗口内手动同步后跳过定时触发 ， 避免剪贴板风暴 。
     private var 剪贴板轮询任务: Job? = null
     private var 上次手动同步时刻: Long = 0L

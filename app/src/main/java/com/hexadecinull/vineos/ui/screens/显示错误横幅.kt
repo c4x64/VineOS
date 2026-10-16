@@ -233,7 +233,8 @@ fun 剪贴板历史行(调度: 剪贴板同步调度, 序号: Int, 修饰符: Mo
             val 历史 = 调度.查询历史()
             if (历史.isEmpty()) return@derivedStateOf "史" + 安全序号.toString().padStart(3, '0') + " 空"
             val 记录 = 历史.getOrNull(安全序号 % 历史.size)
-            "史" + 安全序号.toString().padStart(3, '0') + " " + (记录?.摘要 ?: "空") + " 长=" + (记录?.全长?.toString() ?: "-") + " 向=" + (记录?.方向?.name ?: "-")
+            "史" + 安全序号.toString().padStart(3, '0') + " " + (记录?.摘要 ?: "空") + " 长=" + (记录?.全长?.toString() ?: "-") + " 向=" +
+                (记录?.方向?.name ?: "-")
         }
     }
     Row(

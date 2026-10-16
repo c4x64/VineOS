@@ -17,23 +17,42 @@ data class 缓存命中统计(val 命中: Long, val 未命中: Long, val 条目�
 
 /** 查询种类与其生存期毫秒。 */
 object 查询生存期 {
-    /** 二进制路径探测：路径稳定，存活久。 */ const val 二进制路径: Long = 600_000L
-    /** 命名空间列表：变化较慢。 */ const val 命名空间列表: Long = 3_000L
-    /** 链路与地址查询：中等变化。 */ const val 链路地址: Long = 3_000L
-    /** 路由摘要：中等变化。 */ const val 路由摘要: Long = 3_000L
-    /** 防火墙与地址转换表：变化较快。 */ const val 防火墙表: Long = 5_000L
-    /** 地址转换表。 */ const val 地址转换表: Long = 5_000L
-    /** 流量计数器：变化最快。 */ const val 流量计数: Long = 1_000L
-    /** 系统流量文件：变化最快。 */ const val 系统流量: Long = 1_000L
-    /** 连通性探测：不缓存之外的短缓存。 */ const val 可达探测: Long = 2_000L
+    /** 二进制路径探测：路径稳定，存活久。 */
+    const val 二进制路径: Long = 600_000L
+
+    /** 命名空间列表：变化较慢。 */
+    const val 命名空间列表: Long = 3_000L
+
+    /** 链路与地址查询：中等变化。 */
+    const val 链路地址: Long = 3_000L
+
+    /** 路由摘要：中等变化。 */
+    const val 路由摘要: Long = 3_000L
+
+    /** 防火墙与地址转换表：变化较快。 */
+    const val 防火墙表: Long = 5_000L
+
+    /** 地址转换表。 */
+    const val 地址转换表: Long = 5_000L
+
+    /** 流量计数器：变化最快。 */
+    const val 流量计数: Long = 1_000L
+
+    /** 系统流量文件：变化最快。 */
+    const val 系统流量: Long = 1_000L
+
+    /** 连通性探测：不缓存之外的短缓存。 */
+    const val 可达探测: Long = 2_000L
 }
 
 /** 超时夹紧：所有新路径显式超时统一收敛于此，避免无超时等待。 */
 object 超时夹紧器 {
     /** 查询类超时收敛到 2..10 秒。 */
     fun 查询超时(请求秒: Long): Long = 请求秒.coerceIn(2L, 10L)
+
     /** 变更类超时收敛到 5..30 秒。 */
     fun 变更超时(请求秒: Long): Long = 请求秒.coerceIn(5L, 30L)
+
     /** 批量脚本超时按条数放大后收敛到 10..120 秒。 */
     fun 批量超时(条数: Int, 单条秒: Long = 4L): Long = (8L + 条数 * 单条秒).coerceIn(10L, 120L)
 }
@@ -55,7 +74,7 @@ class 查询缓存加速器 @Inject constructor(private val 执行器: 特权命
         }
         未命中数.incrementAndGet()
         val 载入 = try {
-           加载器()
+            加载器()
         } catch (异常: Exception) {
             Pair("加载失败：" + (异常.message ?: "未知错误"), false)
         }
@@ -66,9 +85,7 @@ class 查询缓存加速器 @Inject constructor(private val 执行器: 特权命
     }
 
     /** 读写原始文本缓存，供流量等大文本复用。 */
-    fun 获取文本(键: String, 生存期毫秒: Long, 加载器: () -> String): String {
-        return 获取(键, 生存期毫秒) { Pair(加载器(), true) }.输出
-    }
+    fun 获取文本(键: String, 生存期毫秒: Long, 加载器: () -> String): String = 获取(键, 生存期毫秒) { Pair(加载器(), true) }.输出
 
     /** 使单键失效。 */
     fun 失效(键: String): Boolean = 表.remove(键) != null
@@ -191,7 +208,20 @@ class 查询缓存加速器 @Inject constructor(private val 执行器: 特权命
         val 现在 = System.currentTimeMillis()
         return 文本.lines().mapNotNull { 行 ->
             val 格 = 行.trim().split(Regex("\\s+"))
-            if (格.size < 5) null else 网卡流量(格[0], 格[1].toLongOrNull() ?: 0L, 格[2].toLongOrNull() ?: 0L, 格[3].toLongOrNull() ?: 0L, 格[4].toLongOrNull() ?: 0L, 现在)
+            if (格.size <
+                5
+            ) {
+                null
+            } else {
+                网卡流量(
+                    格[0],
+                    格[1].toLongOrNull() ?: 0L,
+                    格[2].toLongOrNull() ?: 0L,
+                    格[3].toLongOrNull() ?: 0L,
+                    格[4].toLongOrNull() ?: 0L,
+                    现在
+                )
+            }
         }
     }
 

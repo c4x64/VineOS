@@ -100,20 +100,18 @@ class 许可证校验器 @Inject constructor() {
         过期时间 = 体.getValue("过期时间").jsonPrimitive.long,
     )
 
-    private fun 验根签名(体: JsonObject, 签名hex: String, 根公钥hex: String): Boolean {
-        return try {
-            确保BC()
-            val 工厂 = java.security.KeyFactory.getInstance("Ed25519", "BC")
-            val 公钥 = 工厂.generatePublic(
-                java.security.spec.X509EncodedKeySpec(x509包装(根公钥hex.hexToBytes())),
-            )
-            val 验证 = java.security.Signature.getInstance("Ed25519", "BC")
-            验证.initVerify(公钥)
-            验证.update(规范字节(体))
-            验证.verify(签名hex.hexToBytes())
-        } catch (e: Exception) {
-            false
-        }
+    private fun 验根签名(体: JsonObject, 签名hex: String, 根公钥hex: String): Boolean = try {
+        确保BC()
+        val 工厂 = java.security.KeyFactory.getInstance("Ed25519", "BC")
+        val 公钥 = 工厂.generatePublic(
+            java.security.spec.X509EncodedKeySpec(x509包装(根公钥hex.hexToBytes())),
+        )
+        val 验证 = java.security.Signature.getInstance("Ed25519", "BC")
+        验证.initVerify(公钥)
+        验证.update(规范字节(体))
+        验证.verify(签名hex.hexToBytes())
+    } catch (e: Exception) {
+        false
     }
 
     /** X.509 SubjectPublicKeyInfo 包装 32 字节 Ed25519 裸公钥。 */

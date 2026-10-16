@@ -9,7 +9,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** 网卡搭建请求。 */
-data class 网卡搭建请求(val 实例标识: String, val 命名空间: String, val 宿主端: String, val 容器端: String, val 主机地址: String, val 容器地址: String, val 最大传输单元: Int = 1500)
+data class 网卡搭建请求(
+    val 实例标识: String,
+    val 命名空间: String,
+    val 宿主端: String,
+    val 容器端: String,
+    val 主机地址: String,
+    val 容器地址: String,
+    val 最大传输单元: Int = 1500
+)
 
 /** 防火墙规格。 */
 data class 防火墙规格(val 方向: 防火墙方向, val 协议: 防火墙协议, val 来源: String?, val 目标: String?, val 端口: Int?, val 动作: 防火墙动作, val 优先级: Int, val 备注: String)
@@ -24,22 +32,28 @@ object 规则参数表 {
         require(组号 in 1..64) { "组号超出范围：" + 组号 }
         return (10_000 + 137 * 组号) to (8_000 + 组号)
     }
+
     /** 批量段映射：起始宿主 = 26541 + 211*(组-31)，起始容器 = 9217 + 7*(组-31)，每段 6 个。 */
     fun 批量段起始(组号: Int): Pair<Int, Int> {
         require(组号 in 31..70) { "组号超出范围：" + 组号 }
         return (26_541 + 211 * (组号 - 31)) to (9_217 + 7 * (组号 - 31))
     }
+
     /** 一键暴露基址：33000 + 100*(组-30)，映射容器 22/80/443。 */
     fun 暴露基址(组号: Int): Int {
         require(组号 in 30..69) { "组号超出范围：" + 组号 }
         return 33_000 + 100 * (组号 - 30)
     }
+
     /** 常用容器端口表。 */
     val 暴露容器端口: List<Int> = listOf(22, 80, 443)
+
     /**  MTU 候选表：原 30 组调优变体收敛为一张表。 */
     val 最大传输单元表: List<Int> = listOf(1280, 1300, 1320, 1340, 1360, 1380, 1400, 1420, 1440, 1460, 1480, 1500, 1520, 1540, 1560)
+
     /** 按组号取 MTU，越界时回绕。 */
     fun 按组取MTU(组号: Int): Int = 最大传输单元表[(组号 % 最大传输单元表.size + 最大传输单元表.size) % 最大传输单元表.size]
+
     /** 执行策略表：超时 5..14 秒循环，重试 0..2 循环，特权隔组交替。 */
     fun 执行策略(组号: Int): 执行策略 {
         require(组号 >= 1) { "组号须为正数" }
@@ -47,23 +61,28 @@ object 规则参数表 {
         val 重试 = 组号 % 3
         return 执行策略(超时, 重试, 组号 % 2 == 0)
     }
+
     /** 流量格式化精度表：按组号取 1..3。 */
     fun 格式化精度(组号: Int): Int = 1 + (组号 % 3 + 3) % 3
+
     /** 防火墙优先级：出站 100+组，入站阻断 200+组，DNS 300+组。 */
     fun 出站优先级(组号: Int): Int = 100 + 组号
     fun 入站阻断优先级(组号: Int): Int = 200 + 组号
     fun 域名优先级(组号: Int): Int = 300 + 组号
+
     /** 命名空间后缀：-01..-30 零填充。 */
     fun 命名空间后缀(组号: Int): String {
         require(组号 in 1..64) { "组号超出范围：" + 组号 }
         return "-" + 组号.toString().padStart(2, '0')
     }
+
     /** 转发调优键值：原来 12 组相同 sysctl 收敛为一张表。 */
     val 转发调优键值: Map<String, String> = mapOf(
         "net.ipv4.ip_forward" to "1",
         "net.ipv6.conf.all.forwarding" to "1",
         "net.ipv4.conf.all.rp_filter" to "0"
     )
+
     /** 流量单位表。 */
     val 流量单位: Array<String> = arrayOf("B", "KB", "MB", "GB", "TB")
 }
@@ -310,13 +329,11 @@ class 批量加速器 @Inject constructor(
     }
 
     /** 数据驱动自愈检查：收敛自愈检查 01..29 变体。 */
-    fun 自愈检查(实例标识: String): Map<String, Boolean> {
-        return try {
-            val 编排 = 网络隔离编排单例.获取(执行器, 命名空间, 网卡, 地址, 转发, 防火墙, 流量)
-            编排.健康检查(实例标识)
-        } catch (忽略: Exception) {
-            mapOf("已知" to false)
-        }
+    fun 自愈检查(实例标识: String): Map<String, Boolean> = try {
+        val 编排 = 网络隔离编排单例.获取(执行器, 命名空间, 网卡, 地址, 转发, 防火墙, 流量)
+        编排.健康检查(实例标识)
+    } catch (忽略: Exception) {
+        mapOf("已知" to false)
     }
 
     /** 数据驱动一键暴露：收敛一键暴露 30..69 变体，基址公式计算。 */
@@ -416,17 +433,8 @@ class 批量加速器 @Inject constructor(
 /** 编排器单例持有：避免自愈路径重复构造多份状态表，延迟初始化真实可用。 */
 object 网络隔离编排单例 {
     @Volatile private var 实例: 网络隔离编排器? = null
-    fun 获取(
-        执行器: 特权命令执行器,
-        命名空间: 网络命名空间管理器,
-        网卡: 虚拟网卡管理器,
-        地址: 地址分配器,
-        转发: 端口转发管理器,
-        防火墙: 防火墙规则管理器,
-        流量: 流量统计器
-    ): 网络隔离编排器 {
-        return 实例 ?: synchronized(this) {
+    fun 获取(执行器: 特权命令执行器, 命名空间: 网络命名空间管理器, 网卡: 虚拟网卡管理器, 地址: 地址分配器, 转发: 端口转发管理器, 防火墙: 防火墙规则管理器, 流量: 流量统计器): 网络隔离编排器 =
+        实例 ?: synchronized(this) {
             实例 ?: 网络隔离编排器(执行器, 命名空间, 网卡, 地址, 转发, 防火墙, 流量).also { 实例 = it }
         }
-    }
 }

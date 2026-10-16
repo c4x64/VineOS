@@ -16,13 +16,20 @@ enum class 命名空间状态 { 不存在, 存活, 异常 }
 
 /** 命名空间信息快照。 */
 data class 命名空间信息(
-    /** 命名空间名，对应 /run/netns 下文件名。 */ val 名称: String,
-    /** 是否存在。 */ val 存在: Boolean,
-    /** 回环网卡是否已启用。 */ val 回环已启用: Boolean,
-    /** 网卡列表。 */ val 网卡列表: List<String>,
-    /** 地址列表（CIDR）。 */ val 地址列表: List<String>,
-    /** 路由表摘要。 */ val 路由摘要: String,
-    /** 最近检查时间毫秒。 */ val 检查时间: Long,
+    /** 命名空间名，对应 /run/netns 下文件名。 */
+    val 名称: String,
+    /** 是否存在。 */
+    val 存在: Boolean,
+    /** 回环网卡是否已启用。 */
+    val 回环已启用: Boolean,
+    /** 网卡列表。 */
+    val 网卡列表: List<String>,
+    /** 地址列表（CIDR）。 */
+    val 地址列表: List<String>,
+    /** 路由表摘要。 */
+    val 路由摘要: String,
+    /** 最近检查时间毫秒。 */
+    val 检查时间: Long,
 )
 
 /** 命名空间操作审计记录。 */
@@ -31,10 +38,17 @@ data class 命名空间审计(val 时间: Long, val 操作: String, val 目标: 
 /** 网络命名空间管理器：所有方法均真实执行系统命令。 */
 @Singleton
 class 网络命名空间管理器 @Inject constructor(internal val 执行器: 特权命令执行器) {
-    /** 已知命名空间缓存。 */ private val 缓存 = ConcurrentHashMap<String, 命名空间信息>()
-    /** 审计日志（内存环形，至多保留 500 条）。 */ private val 审计 = ArrayDeque<命名空间审计>()
-    /** netns 文件目录。 */ private val 命名空间目录 = File("/run/netns")
-    /** ip 二进制路径，延迟解析。 */ private var 已解析Ip路径: String? = null
+    /** 已知命名空间缓存。 */
+    private val 缓存 = ConcurrentHashMap<String, 命名空间信息>()
+
+    /** 审计日志（内存环形，至多保留 500 条）。 */
+    private val 审计 = ArrayDeque<命名空间审计>()
+
+    /** netns 文件目录。 */
+    private val 命名空间目录 = File("/run/netns")
+
+    /** ip 二进制路径，延迟解析。 */
+    private var 已解析Ip路径: String? = null
 
     /** 解析 ip 二进制绝对路径。 */
     fun 解析Ip路径(): String {
@@ -55,9 +69,13 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 列出命名空间(): List<String> {
         val 路径 = 解析Ip路径()
         val 结果 = 执行器.智能执行(listOf(路径, "netns", "list"), false)
-        if (!结果.是否成功()) { 记审计("列出", "全部", false, 结果.错误输出); return 缓存.keys.toList() }
+        if (!结果.是否成功()) {
+            记审计("列出", "全部", false, 结果.错误输出)
+            return 缓存.keys.toList()
+        }
         val 名单 = 结果.标准输出.lines().mapNotNull { 行 ->
-            val 去空白 = 行.trim(); if (去空白.isEmpty()) null else 去空白.split(Regex("\\s+"))[0]
+            val 去空白 = 行.trim()
+            if (去空白.isEmpty()) null else 去空白.split(Regex("\\s+"))[0]
         }.filter { it.isNotEmpty() }
         记审计("列出", "全部", true, "数量=" + 名单.size)
         return 名单
@@ -67,18 +85,30 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 检查存在(名称: String): Boolean {
         命令辅助.校验命名空间名合法(名称)
         val 文件存在 = File(命名空间目录, 名称).exists() || File("/var/run/netns/" + 名称).exists()
-        val 列表存在 = try { 列出命名空间().contains(名称) } catch (忽略: Exception) { false }
+        val 列表存在 = try {
+            列出命名空间().contains(名称)
+        } catch (忽略: Exception) {
+            false
+        }
         return 文件存在 || 列表存在
     }
 
     /** 创建命名空间：真实执行 ip netns add，并启用回环。 */
     fun 创建命名空间(名称: String, 启用回环: Boolean = true): 网络命令结果 {
         命令辅助.校验命名空间名合法(名称)
-        if (检查存在(名称)) { 记审计("创建", 名称, true, "已存在直接返回"); return 网络命令结果(0, "已存在", "", 0, false, listOf("ip")) }
+        if (检查存在(名称)) {
+            记审计("创建", 名称, true, "已存在直接返回")
+            return 网络命令结果(0, "已存在", "", 0, false, listOf("ip"))
+        }
         val 路径 = 解析Ip路径()
         val 创建 = 执行器.智能执行(listOf(路径, "netns", "add", 名称), true)
-        if (!创建.是否成功()) { 记审计("创建", 名称, false, 创建.错误输出); return 创建 }
-        if (启用回环) { 启用回环网卡(名称) }
+        if (!创建.是否成功()) {
+            记审计("创建", 名称, false, 创建.错误输出)
+            return 创建
+        }
+        if (启用回环) {
+            启用回环网卡(名称)
+        }
         缓存.remove(名称)
         记审计("创建", 名称, true, 创建.标准输出)
         return 创建
@@ -138,9 +168,33 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     /** 获取命名空间信息快照：组合多条真实查询。 */
     fun 获取信息快照(名称: String): 命名空间信息 {
         val 存在 = 检查存在(名称)
-        val 网卡 = if (存在) try { 查询网卡列表(名称) } catch (忽略: Exception) { emptyList() } else emptyList()
-        val 地址 = if (存在) try { 查询地址列表(名称) } catch (忽略: Exception) { emptyList() } else emptyList()
-        val 路由 = if (存在) try { 查询路由摘要(名称) } catch (忽略: Exception) { "" } else ""
+        val 网卡 = if (存在) {
+            try {
+                查询网卡列表(名称)
+            } catch (忽略: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+        val 地址 = if (存在) {
+            try {
+                查询地址列表(名称)
+            } catch (忽略: Exception) {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+        val 路由 = if (存在) {
+            try {
+                查询路由摘要(名称)
+            } catch (忽略: Exception) {
+                ""
+            }
+        } else {
+            ""
+        }
         val 回环 = 网卡.contains("lo")
         val 快照 = 命名空间信息(名称, 存在, 回环, 网卡, 地址, 路由.take(1000), System.currentTimeMillis())
         if (存在) 缓存[名称] = 快照
@@ -152,9 +206,9 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
 
     /** 协程版创建。 */
     suspend fun 协程创建(名称: String): 网络命令结果 = withContext(Dispatchers.IO) { 创建命名空间(名称) }
+
     /** 协程版删除。 */
     suspend fun 协程删除(名称: String): 网络命令结果 = withContext(Dispatchers.IO) { 删除命名空间(名称) }
-
 
     /** 第01组实例命名空间快捷操作：vine 实例 01 的创建/查询/清理（真实执行）。 */
     fun 实例命名空间保障01(实例标识: String): 命名空间信息 {
@@ -170,8 +224,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理01(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-01"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -189,8 +251,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理02(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-02"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -208,8 +278,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理03(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-03"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -227,8 +305,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理04(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-04"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -246,8 +332,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理05(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-05"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -265,8 +359,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理06(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-06"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -284,8 +386,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理07(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-07"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -303,8 +413,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理08(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-08"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -322,8 +440,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理09(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-09"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -341,8 +467,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理10(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-10"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -360,8 +494,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理11(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-11"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -379,8 +521,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理12(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-12"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -398,8 +548,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理13(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-13"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -417,8 +575,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理14(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-14"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -436,8 +602,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理15(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-15"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -455,8 +629,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理16(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-16"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -474,8 +656,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理17(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-17"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -493,8 +683,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理18(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-18"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -512,8 +710,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理19(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-19"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -531,8 +737,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理20(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-20"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -550,8 +764,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理21(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-21"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -569,8 +791,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理22(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-22"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -588,8 +818,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理23(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-23"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -607,8 +845,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理24(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-24"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -626,8 +872,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理25(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-25"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -645,8 +899,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理26(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-26"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -664,8 +926,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理27(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-27"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -683,8 +953,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理28(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-28"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -702,8 +980,16 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理29(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-29"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
@@ -721,15 +1007,26 @@ class 网络命名空间管理器 @Inject constructor(internal val 执行器: �
     fun 实例命名空间清理30(实例标识: String): 网络命令结果 {
         命令辅助.校验实例名合法(实例标识)
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + "-30"
-        val 查询 = try { 查询网卡列表(命名) } catch (忽略: Exception) { emptyList<String>() }
-        查询.forEach { 网卡 -> try { 在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡)) } catch (忽略: Exception) { } }
+        val 查询 = try {
+            查询网卡列表(命名)
+        } catch (忽略: Exception) {
+            emptyList<String>()
+        }
+        查询.forEach { 网卡 ->
+            try {
+                在命名空间执行(命名, listOf(解析Ip路径(), "link", "delete", 网卡))
+            } catch (忽略: Exception) { }
+        }
         return 删除命名空间(命名)
     }
 
     /** 获取审计日志副本。 */
     fun 获取审计(): List<命名空间审计> = 审计.toList()
+
     /** 清理缓存。 */
-    fun 清理缓存() { 缓存.clear() }
+    fun 清理缓存() {
+        缓存.clear()
+    }
 }
 
 /** 第01组命名空间 sysctl 调优：转发与邻居表（真实执行 sysctl -w）。 */
@@ -932,115 +1229,158 @@ fun 网络命名空间管理器.应用转发调优20(命名: String): List<网�
     }
 }
 
-
 /** 命名空间诊断附录：连通性与自检（真实执行）。 */
+
 /** 附录60：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体60(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体60(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录61：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体61(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体61(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录62：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体62(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体62(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录63：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体63(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体63(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录64：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体64(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体64(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录65：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体65(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体65(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录66：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体66(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体66(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录67：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体67(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体67(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录68：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体68(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体68(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录69：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体69(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体69(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录70：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体70(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体70(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录71：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体71(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体71(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录72：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体72(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体72(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录73：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体73(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体73(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录74：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体74(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体74(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录75：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体75(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体75(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录76：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体76(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体76(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录77：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体77(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体77(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录78：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体78(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体78(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录79：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体79(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体79(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录80：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体80(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体80(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
 
 /** 附录81：系统自检变体（真实执行 ip 或 ping）。 */
-fun 网络命名空间管理器.诊断变体81(): List<String> {
-    return try { 列出命名空间() } catch (忽略: Exception) { emptyList() }
+fun 网络命名空间管理器.诊断变体81(): List<String> = try {
+    列出命名空间()
+} catch (忽略: Exception) {
+    emptyList()
 }
-

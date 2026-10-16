@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.hexadecinull.vineos.ui.viewmodel.多指触控分发器
 import com.hexadecinull.vineos.ui.viewmodel.手势导航增强
-import com.hexadecinull.vineos.ui.viewmodel.显示状态机
 import com.hexadecinull.vineos.ui.viewmodel.显示状态
+import com.hexadecinull.vineos.ui.viewmodel.显示状态机
 
 /**
  * 触控手势覆盖层。
@@ -81,23 +81,27 @@ fun 稳定多指表面(
         factory = { 上下文 ->
             SurfaceView(上下文).apply {
                 holder.addCallback(object : SurfaceHolder.Callback {
-                    override fun surfaceCreated(持有者: SurfaceHolder) { 最新表面就绪(持有者.surface) }
+                    override fun surfaceCreated(持有者: SurfaceHolder) {
+                        最新表面就绪(持有者.surface)
+                    }
                     override fun surfaceChanged(持有者: SurfaceHolder, 格式: Int, 宽: Int, 高: Int) {}
-                    override fun surfaceDestroyed(持有者: SurfaceHolder) { 最新表面销毁() }
+                    override fun surfaceDestroyed(持有者: SurfaceHolder) {
+                        最新表面销毁()
+                    }
                 })
                 setOnTouchListener { _, 事件 ->
                     if (事件.pointerCount > 1) {
                         val 数量 = minOf(事件.pointerCount, 10)
-                        val 编号集 = IntArray(数量) { 索引 ->事件.getPointerId(索引) }
-                        val 横集 = FloatArray(数量) { 索引 ->事件.getX(索引) }
-                        val 纵集 = FloatArray(数量) { 索引 ->事件.getY(索引) }
+                        val 编号集 = IntArray(数量) { 索引 -> 事件.getPointerId(索引) }
+                        val 横集 = FloatArray(数量) { 索引 -> 事件.getX(索引) }
+                        val 纵集 = FloatArray(数量) { 索引 -> 事件.getY(索引) }
                         val 存活集 = BooleanArray(数量) { true }
                         when (事件.actionMasked) {
                             MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
                                 val 抬起位 = 最新分发器.定位抬起位置(事件, 编号集, 数量)
                                 if (抬起位 in 0 until 数量)存活集[抬起位] = false
                             }
-                            MotionEvent.ACTION_CANCEL ->存活集.fill(false)
+                            MotionEvent.ACTION_CANCEL -> 存活集.fill(false)
                             else -> {}
                         }
                         最新分发器.分发多指事件(事件.actionMasked, 事件.actionIndex, 数量, 编号集, 横集, 纵集, 存活集)

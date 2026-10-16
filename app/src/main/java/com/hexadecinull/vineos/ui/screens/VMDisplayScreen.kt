@@ -108,11 +108,21 @@ private fun GuestSurface(
                                 val 抬起位 = try {
                                     val 抬起编号 = event.getPointerId(event.actionIndex)
                                     var 命中 = -1
-                                    for (i in 0 until 槽位数) if (槽位映射[i] == 抬起编号) { 命中 = i; break }
+                                    for (i in 0 until 槽位数) {
+                                        if (槽位映射[i] == 抬起编号) {
+                                            命中 = i
+                                            break
+                                        }
+                                    }
                                     命中
-                                } catch (异常: Exception) { -1 }
-                                if (抬起位 in 0 until 槽位数) 存活标志集[抬起位] = false
-                                else if (event.actionIndex in 0 until 槽位数) 存活标志集[event.actionIndex] = false
+                                } catch (异常: Exception) {
+                                    -1
+                                }
+                                if (抬起位 in 0 until 槽位数) {
+                                    存活标志集[抬起位] = false
+                                } else if (event.actionIndex in 0 until 槽位数) {
+                                    存活标志集[event.actionIndex] = false
+                                }
                             }
                             MotionEvent.ACTION_CANCEL ->
                                 存活标志集.fill(false)

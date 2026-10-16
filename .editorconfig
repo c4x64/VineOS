@@ -43,5 +43,13 @@ ktlint_standard_multiline-expression-wrapping = disabled
 # Annotations on their own line are a style choice, not required
 ktlint_standard_annotation = disabled
 
+# Project convention is Chinese identifiers (classes, functions, properties,
+# packages). The naming rules assume ASCII camelCase and cannot evaluate
+# CJK names, so they are disabled project-wide by design.
+ktlint_standard_package-name = disabled
+ktlint_standard_class-naming = disabled
+ktlint_standard_function-naming = disabled
+ktlint_standard_property-naming = disabled
+
 [*.md]
 trim_trailing_whitespace = false

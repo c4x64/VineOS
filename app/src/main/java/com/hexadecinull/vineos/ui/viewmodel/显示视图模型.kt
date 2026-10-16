@@ -7,12 +7,12 @@ import com.hexadecinull.vineos.data.models.VMStatus
 import com.hexadecinull.vineos.data.repository.InstanceRepository
 import com.hexadecinull.vineos.domain.VineVMManager
 import com.hexadecinull.vineos.native.VineRuntime
+import kotlin.math.min
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.min
 
 /**
  * 显示视图模型。
@@ -44,34 +44,43 @@ data class 兼容分发批次(
  * @param 虚拟机管理 虚拟机管理器。
  * @param 实例仓库 实例仓库。
  */
-class 显示视图模型(
-    private val 虚拟机管理: VineVMManager,
-    private val 实例仓库: InstanceRepository,
-) : ViewModel() {
+class 显示视图模型(private val 虚拟机管理: VineVMManager, private val 实例仓库: InstanceRepository,) : ViewModel() {
     /** 多指分发器。 */
     val 触控分发 = 多指触控分发器()
+
     /** 手势增强。 */
     val 手势增强 = 手势导航增强()
+
     /** 状态机。 */
     val 状态机 = 显示状态机()
+
     /** 剪贴板调度。 */
     val 剪贴板调度 = 剪贴板同步调度()
+
     /** 错误中心。 */
     val 错误中心 = 错误提示中心()
+
     /** 实例编号。 */
     private var 实例编号: String? = null
+
     /** 实例句柄。 */
     private var 实例句柄: Long = 0L
+
     /** 状态任务。 */
     private var 状态任务: Job? = null
+
     /** 上次虚拟机状态，去重用。 */
     private var 上次虚拟机状态: VMStatus? = null
+
     /** 上次多指发送时刻，节流用。 */
     private var 上次发送时刻: Long = 0L
+
     /** 多指最小发送间隔毫秒。 */
     var 最小发送间隔: Long = 8L
+
     /** 是否启动中。 */
     private val 启动中流内部 = MutableStateFlow(false)
+
     /** 对外启动中流。 */
     val 启动中流: StateFlow<Boolean> = 启动中流内部.asStateFlow()
 
@@ -232,8 +241,10 @@ class 显示视图模型(
 
     /** 发送返回键。 */
     fun 发送返回键() = 发送按键(android.view.KeyEvent.KEYCODE_BACK)
+
     /** 发送主页键。 */
     fun 发送主页键() = 发送按键(android.view.KeyEvent.KEYCODE_HOME)
+
     /** 发送概览键。 */
     fun 发送概览键() = 发送按键(android.view.KeyEvent.KEYCODE_APP_SWITCH)
 

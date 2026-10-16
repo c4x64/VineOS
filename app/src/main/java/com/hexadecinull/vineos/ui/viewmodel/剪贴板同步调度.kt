@@ -1,5 +1,6 @@
 package com.hexadecinull.vineos.ui.viewmodel
 
+import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.math.min
 
 /**
  * 剪贴板同步调度。
@@ -30,10 +30,34 @@ import kotlin.math.min
  */
 
 /** 剪贴板方向。 */
-enum class 剪贴板方向 { /** 宿主到客户机。 */ 宿主到客户机, /** 客户机到宿主。 */ 客户机到宿主 }
+enum class 剪贴板方向 {
+    /** 宿主到客户机。 */
+    宿主到客户机,
+
+    /** 客户机到宿主。 */
+    客户机到宿主
+}
 
 /** 剪贴板同步状态。 */
-enum class 剪贴板同步状态 { /** 空闲。 */ 空闲, /** 推送中。 */ 推送中, /** 拉取中。 */ 拉取中, /** 成功。 */ 成功, /** 失败。 */ 失败, /** 节流中。 */ 节流中 }
+enum class 剪贴板同步状态 {
+    /** 空闲。 */
+    空闲,
+
+    /** 推送中。 */
+    推送中,
+
+    /** 拉取中。 */
+    拉取中,
+
+    /** 成功。 */
+    成功,
+
+    /** 失败。 */
+    失败,
+
+    /** 节流中。 */
+    节流中
+}
 
 /** 剪贴板记录。 */
 data class 剪贴板记录(
@@ -69,38 +93,55 @@ data class 剪贴板快照(
 class 剪贴板同步调度 {
     /** 最大文本长度，超长截断。 */
     var 最大长度: Int = 65536
+
     /** 轮询间隔毫秒。 */
     var 轮询间隔: Long = 1500L
+
     /** 防抖窗口毫秒。 */
     var 防抖窗口: Long = 400L
+
     /** 最大重试次数。 */
     var 最大重试: Int = 3
+
     /** 历史上限，bounded。 */
     var 历史上限: Int = 50
+
     /** 上次宿主文本。 */
     private var 上次宿主: String = ""
+
     /** 上次客户机文本。 */
     private var 上次客户机: String = ""
+
     /** 上次推送时刻。 */
     private var 上次推送时刻: Long = 0L
+
     /** 历史记录，最多五十条。 */
     private val 历史 = ArrayDeque<剪贴板记录>()
+
     /** 成功率缓存。 */
     private var 缓存成功率: Double = 1.0
+
     /** 成功率脏标记。 */
     private var 成功率脏: Boolean = true
+
     /** 内部作用域。 */
     private val 作用域 = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     /** 轮询任务。 */
     private var 轮询任务: Job? = null
+
     /** 状态流内部。 */
     private val 状态流内部 = MutableStateFlow(剪贴板快照("", "", 剪贴板同步状态.空闲, ""))
+
     /** 对外状态流。 */
     val 状态流: StateFlow<剪贴板快照> = 状态流内部.asStateFlow()
+
     /** 推送回调，由调用方注入真实推送实现。 */
     var 推送实现: ((String) -> Boolean)? = null
+
     /** 拉取回调，由调用方注入真实拉取实现。 */
     var 拉取实现: (() -> String)? = null
+
     /** 宿主写入回调，用于把客户机文本回写宿主。 */
     var 回写宿主实现: ((String) -> Unit)? = null
 
@@ -335,9 +376,7 @@ class 剪贴板同步调度 {
      * @param 方向 方向。
      * @return 与文本表一一对应的是否重复表。
      */
-    fun 批量查询去重(文本表: List<String>, 方向: 剪贴板方向): List<Boolean> {
-        return 文本表.map { 批量去重检查(it, 方向) }
-    }
+    fun 批量查询去重(文本表: List<String>, 方向: 剪贴板方向): List<Boolean> = 文本表.map { 批量去重检查(it, 方向) }
 
     /**
      * 分段推送策略。

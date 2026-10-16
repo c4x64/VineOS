@@ -34,8 +34,7 @@ class InstanceDetailViewModel @Inject constructor(
     private val vmManager: VineVMManager,
     // 快照管理器 ： 快照增删查改唯一入口 ， 为空时退化为直连虚拟机管理 。
     private val 快照管理: 快照管理器? = null,
-) :
-    ViewModel() {
+) : ViewModel() {
     private val instanceIdFlow = MutableStateFlow("")
     private val diagnosticsFlow = MutableStateFlow("")
     private val 快照列表流 = MutableStateFlow<List<String>>(emptyList())
@@ -120,8 +119,9 @@ class InstanceDetailViewModel @Inject constructor(
                     runCatching { 管理.列出(实例) }.getOrDefault(emptyList())
                 } else {
                     val 目录 = File(实例.storagePath, "snapshots")
-                    if (!目录.isDirectory) emptyList()
-                    else {
+                    if (!目录.isDirectory) {
+                        emptyList()
+                    } else {
                         目录.listFiles { 文件 -> 文件.extension == "gz" }
                             ?.map { it.nameWithoutExtension.substringBeforeLast(".tar") }
                             .orEmpty().sorted()

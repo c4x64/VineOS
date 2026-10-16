@@ -4,43 +4,58 @@ package com.hexadecinull.vineos.诊断
 // 文件功能：诊断原生桥——Kotlin 侧 JNI 声明与安全封装
 // 说明：所有原生方法名中文，系统 API（System/JNI）保持英文。
 object 诊断原生桥 {
-  // 是否已加载原生库
-  private var 已加载 = false
-  // 加载结果说明
-  var 加载说明 = "未初始化"
-    private set
-  @Synchronized fun 确保加载(): Boolean {
-    if (已加载) return true
-    return try {
-      System.loadLibrary("vine_runtime")
-      已加载 = true
-      加载说明 = "加载成功"
-      true
-    } catch (异常: UnsatisfiedLinkError) {
-      加载说明 = "加载失败：${异常.message}"
-      false
+    // 是否已加载原生库
+    private var 已加载 = false
+
+    // 加载结果说明
+    var 加载说明 = "未初始化"
+        private set
+
+    @Synchronized fun 确保加载(): Boolean {
+        if (已加载) return true
+        return try {
+            System.loadLibrary("vine_runtime")
+            已加载 = true
+            加载说明 = "加载成功"
+            true
+        } catch (异常: UnsatisfiedLinkError) {
+            加载说明 = "加载失败：${异常.message}"
+            false
+        }
     }
-  }
-  private fun <结果> 通用原生调用(备用: String, 调用: () -> 结果): String { if (!确保加载()) return "原生库未加载：$加载说明"; return try { (调用() as? String) ?: 备用 } catch (异常: Exception) { "调用失败：${异常.message}".take(500) } }
-  private external fun 原生获取诊断摘要(): String
-  private external fun 原生获取性能摘要(): String
-  private external fun 原生获取内存摘要(): String
-  private external fun 原生获取线程摘要(): String
-  private external fun 原生获取错误摘要(): String
-  fun 获取诊断摘要(): String {
-    if (!确保加载()) return "原生库未加载：$加载说明"
-    return try { 原生获取诊断摘要() } catch (异常: Exception) { "调用失败：${异常.message}" }
-  }
-  fun 获取性能摘要(): String = 通用原生调用("暂无性能") { 原生获取性能摘要() }
-  fun 获取内存摘要(): String = 通用原生调用("暂无内存") { 原生获取内存摘要() }
-  fun 获取线程摘要(): String = 通用原生调用("暂无线程") { 原生获取线程摘要() }
-  fun 获取错误摘要(): String = 通用原生调用("暂无错误") { 原生获取错误摘要() }
+    private fun <结果> 通用原生调用(备用: String, 调用: () -> 结果): String {
+        if (!确保加载()) return "原生库未加载：$加载说明"
+        return try {
+            (调用() as? String) ?: 备用
+        } catch (
+            异常: Exception
+        ) {
+            "调用失败：${异常.message}".take(500)
+        }
+    }
+    private external fun 原生获取诊断摘要(): String
+    private external fun 原生获取性能摘要(): String
+    private external fun 原生获取内存摘要(): String
+    private external fun 原生获取线程摘要(): String
+    private external fun 原生获取错误摘要(): String
+    fun 获取诊断摘要(): String {
+        if (!确保加载()) return "原生库未加载：$加载说明"
+        return try {
+            原生获取诊断摘要()
+        } catch (异常: Exception) {
+            "调用失败：${异常.message}"
+        }
+    }
+    fun 获取性能摘要(): String = 通用原生调用("暂无性能") { 原生获取性能摘要() }
+    fun 获取内存摘要(): String = 通用原生调用("暂无内存") { 原生获取内存摘要() }
+    fun 获取线程摘要(): String = 通用原生调用("暂无线程") { 原生获取线程摘要() }
+    fun 获取错误摘要(): String = 通用原生调用("暂无错误") { 原生获取错误摘要() }
 }
 fun 诊断原生桥.通用格式化(原文: String, 段号: Int = 0): String {
-  if (原文.isEmpty()) return "暂无数据"
-  val 上限 = 2000
-  val 截断 = if (原文.length > 上限)原文.substring(0, 上限) + "…" else 原文
-  return 截断.replace("\r", "").trim()
+    if (原文.isEmpty()) return "暂无数据"
+    val 上限 = 2000
+    val 截断 = if (原文.length > 上限)原文.substring(0, 上限) + "…" else 原文
+    return 截断.replace("\r", "").trim()
 }
 fun 诊断原生桥.辅助格式化1(原文: String): String = 通用格式化(原文, 1)
 fun 诊断原生桥.辅助格式化2(原文: String): String = 通用格式化(原文, 2)

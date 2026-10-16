@@ -19,7 +19,19 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 
 /** 错误级别。 */
-enum class 错误级别 { /** 提示。 */ 提示, /** 警告。 */ 警告, /** 错误。 */ 错误, /** 致命。 */ 致命 }
+enum class 错误级别 {
+    /** 提示。 */
+    提示,
+
+    /** 警告。 */
+    警告,
+
+    /** 错误。 */
+    错误,
+
+    /** 致命。 */
+    致命
+}
 
 /** 错误记录。 */
 data class 错误记录(
@@ -59,18 +71,25 @@ data class 错误定义(
 class 错误提示中心 {
     /** 定义表。 */
     private val 定义表 = LinkedHashMap<Int, 错误定义>()
+
     /** 队列，上限三十。 */
     private val 队列 = ArrayDeque<错误记录>()
+
     /** 去重窗口毫秒。 */
     var 去重窗口: Long = 3000L
+
     /** 队列上限。 */
     var 队列上限: Int = 30
+
     /** 当前展示。 */
     private val 当前流内部 = MutableStateFlow<错误记录?>(null)
+
     /** 对外当前流。 */
     val 当前流: StateFlow<错误记录?> = 当前流内部.asStateFlow()
+
     /** 队列流内部。 */
     private val 队列流内部 = MutableStateFlow<List<错误记录>>(emptyList())
+
     /** 对外队列流。 */
     val 队列流: StateFlow<List<错误记录>> = 队列流内部.asStateFlow()
 
@@ -260,9 +279,7 @@ class 错误提示中心 {
      * @param 细节 细节。
      * @return 记录表。
      */
-    fun 批量快捷上报(序号表: List<Int>, 细节: String = ""): List<错误记录> {
-        return 序号表.map { 快捷上报(it, 细节) }
-    }
+    fun 批量快捷上报(序号表: List<Int>, 细节: String = ""): List<错误记录> = 序号表.map { 快捷上报(it, 细节) }
 
     /**
      * 文案复核。
@@ -289,7 +306,5 @@ class 错误提示中心 {
      * @param 记录表 记录表。
      * @return 复核字符串表。
      */
-    fun 批量文案复核(记录表: List<错误记录>): List<String> {
-        return 记录表.mapIndexed { 索引, 记录 -> 文案复核(记录, 索引) }
-    }
+    fun 批量文案复核(记录表: List<错误记录>): List<String> = 记录表.mapIndexed { 索引, 记录 -> 文案复核(记录, 索引) }
 }

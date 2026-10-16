@@ -127,7 +127,8 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection(title = "Shizuku") {                ShizukuSettingsContent(
+            SettingsSection(title = "Shizuku") {
+                ShizukuSettingsContent(
                     status = shizukuStatus,
                     onRequestPermission = onRequestShizukuPermission,
                     probeState = probeState,

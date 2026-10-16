@@ -1,11 +1,11 @@
 package com.hexadecinull.vineos.ui.viewmodel
 
 import android.view.MotionEvent
+import kotlin.math.abs
+import kotlin.math.hypot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.math.abs
-import kotlin.math.hypot
 
 /**
  * 手势导航增强。
@@ -22,10 +22,58 @@ import kotlin.math.hypot
  */
 
 /** 手势类型。 */
-enum class 手势类型 { /** 未知。 */ 未知, /** 单击。 */ 单击, /** 双击。 */ 双击, /** 长按。 */ 长按, /** 上滑。 */ 上滑, /** 下滑。 */ 下滑, /** 左滑。 */ 左滑, /** 右滑。 */ 右滑, /** 捏合放大。 */ 捏合放大, /** 捏合缩小。 */ 捏合缩小, /** 边缘返回。 */ 边缘返回, /** 底部主页。 */ 底部主页 }
+enum class 手势类型 {
+    /** 未知。 */
+    未知,
+
+    /** 单击。 */
+    单击,
+
+    /** 双击。 */
+    双击,
+
+    /** 长按。 */
+    长按,
+
+    /** 上滑。 */
+    上滑,
+
+    /** 下滑。 */
+    下滑,
+
+    /** 左滑。 */
+    左滑,
+
+    /** 右滑。 */
+    右滑,
+
+    /** 捏合放大。 */
+    捏合放大,
+
+    /** 捏合缩小。 */
+    捏合缩小,
+
+    /** 边缘返回。 */
+    边缘返回,
+
+    /** 底部主页。 */
+    底部主页
+}
 
 /** 导航意图。 */
-enum class 导航意图 { /** 无。 */ 无, /** 返回。 */ 返回, /** 主页。 */ 主页, /** 概览。 */ 概览 }
+enum class 导航意图 {
+    /** 无。 */
+    无,
+
+    /** 返回。 */
+    返回,
+
+    /** 主页。 */
+    主页,
+
+    /** 概览。 */
+    概览
+}
 
 /** 手势事件。 */
 data class 手势事件(
@@ -67,42 +115,61 @@ data class 阈值校验请求(
 class 手势导航增强 {
     /** 单击最大位移。 */
     var 单击位移: Float = 12f
+
     /** 单击最大时长。 */
     var 单击时长: Long = 250L
+
     /** 双击最大间隔。 */
     var 双击间隔: Long = 350L
+
     /** 长按阈值。 */
     var 长按阈值: Long = 500L
+
     /** 滑动最小距离。 */
     var 滑动距离: Float = 60f
+
     /** 边缘宽度。 */
     var 边缘宽度: Float = 48f
+
     /** 底部高度。 */
     var 底部高度: Float = 72f
+
     /** 屏幕宽度。 */
     var 屏幕宽: Float = 1080f
+
     /** 屏幕高度。 */
     var 屏幕高: Float = 2400f
+
     /** 按下横。 */
     private var 按下横: Float = 0f
+
     /** 按下纵。 */
     private var 按下纵: Float = 0f
+
     /** 按下时刻。 */
     private var 按下时刻: Long = 0L
+
     /** 上次单击时刻。 */
     private var 上次单击: Long = 0L
+
     /** 是否长按已触发。 */
     private var 长按已触发: Boolean = false
+
     /** 捏合基准距。 */
     private var 捏合基准: Float = 0f
+
     /** 上次上报类型。 */
     private var 上次上报类型: 手势类型 = 手势类型.未知
+
     /** 上次上报时刻。 */
     private var 上次上报时刻: Long = 0L
+
     /** 事件流内部。 */
     private val 事件流内部 = MutableStateFlow<手势事件?>(null)
+
     /** 对外事件流。 */
     val 事件流: StateFlow<手势事件?> = 事件流内部.asStateFlow()
+
     /** 历史，上限一百。 */
     private val 历史 = ArrayDeque<手势事件>()
 
@@ -230,17 +297,15 @@ class 手势导航增强 {
      * @param 事件 事件。
      * @return 手势事件或空。
      */
-    fun 从事件识别(事件: MotionEvent): 手势事件? {
-        return when (事件.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                触摸按下(主指针横(事件, false), 主指针纵(事件, false))
-                null
-            }
-            MotionEvent.ACTION_MOVE -> 触摸移动(主指针横(事件, false), 主指针纵(事件, false), 双指间距(事件))
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> 触摸抬起(主指针横(事件, true), 主指针纵(事件, true))
-            MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_POINTER_DOWN -> 触摸移动(主指针横(事件, false), 主指针纵(事件, false), 双指间距(事件))
-            else -> null
+    fun 从事件识别(事件: MotionEvent): 手势事件? = when (事件.actionMasked) {
+        MotionEvent.ACTION_DOWN -> {
+            触摸按下(主指针横(事件, false), 主指针纵(事件, false))
+            null
         }
+        MotionEvent.ACTION_MOVE -> 触摸移动(主指针横(事件, false), 主指针纵(事件, false), 双指间距(事件))
+        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> 触摸抬起(主指针横(事件, true), 主指针纵(事件, true))
+        MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_POINTER_DOWN -> 触摸移动(主指针横(事件, false), 主指针纵(事件, false), 双指间距(事件))
+        else -> null
     }
 
     /**
@@ -388,9 +453,7 @@ class 手势导航增强 {
      * @param 请求表 请求表。
      * @return 描述表。
      */
-    fun 批量阈值校验(请求表: List<阈值校验请求>): List<String> {
-        return 请求表.map { 阈值校验(it.起横, it.起纵, it.终横, it.终纵, it.档位) }
-    }
+    fun 批量阈值校验(请求表: List<阈值校验请求>): List<String> = 请求表.map { 阈值校验(it.起横, it.起纵, it.终横, it.终纵, it.档位) }
 
     /**
      * 意图映射复核。
@@ -421,7 +484,5 @@ class 手势导航增强 {
      * @param 档位 档位。
      * @return 意图表。
      */
-    fun 批量意图复核(事件表: List<手势事件>, 档位: Int = 0): List<导航意图> {
-        return 事件表.map { 意图映射复核(it, 档位) }
-    }
+    fun 批量意图复核(事件表: List<手势事件>, 档位: Int = 0): List<导航意图> = 事件表.map { 意图映射复核(it, 档位) }
 }

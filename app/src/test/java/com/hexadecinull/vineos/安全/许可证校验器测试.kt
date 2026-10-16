@@ -38,11 +38,7 @@ class 许可证校验器测试 {
         rom包.writeBytes(ByteArray(4096) { it.toByte() })
     }
 
-    private fun 签发许可证(
-        设备标识: String = "测试设备",
-        过期偏移秒: Long = 3600,
-        包哈希: String? = null,
-    ): String {
+    private fun 签发许可证(设备标识: String = "测试设备", 过期偏移秒: Long = 3600, 包哈希: String? = null,): String {
         val 体 = buildJsonObject {
             put("版本", 1)
             put("rom标识", "vine-rom-test")
