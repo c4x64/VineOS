@@ -4,6 +4,13 @@
 #include <vector>
 #include <mutex>
 #include <cmath>
+#include <fstream>
+#include <sstream>
+#include <functional>
+#include <sys/stat.h>
+#include <cerrno>
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/system_properties.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
@@ -395,13 +402,6 @@ Java_com_hexadecinull_vineos_native_VineRuntime_sendKeyEvent(
 //   推送失败返回 JNI_FALSE，拉取失败返回空内容但已真实尝试读取。
 // · 所有路径拼接、目录创建、读写、校验均为真实实现，均为完整实现。
 // ============================================================================
-#include <fstream>
-#include <sstream>
-#include <sys/stat.h>
-#include <cerrno>
-#include <fcntl.h>
-#include <unistd.h>
-#include <functional>
 
 // 剪贴板文件交换的中文配置常量（与上层 Kotlin 文件交换器保持一致）
 namespace 剪贴板文件配置 {
