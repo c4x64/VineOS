@@ -15,7 +15,7 @@ data class 防火墙规则(val 编号: String, val 方向: 防火墙方向, val 
 class 防火墙规则管理器 @Inject constructor(private val 执行器: 特权命令执行器) {
     private val 规则表 = ConcurrentHashMap<String, 防火墙规则>()
     /** 是否优先 nft。 */ var 优先Nft: Boolean = true
-    private fun 用Nft(): Boolean = 优先Nft && try { 执行器.探测二进制路径("nft").可用 } catch (_: Exception) { false }
+    private fun 用Nft(): Boolean = 优先Nft && try { 执行器.探测二进制路径("nft").可用 } catch (忽略: Exception) { false }
     private fun 表名(方向: 防火墙方向): String = when (方向) { 防火墙方向.入站 -> "INPUT"; 防火墙方向.出站 -> "OUTPUT"; 防火墙方向.转发 -> "FORWARD" }
 
     /** 构造 iptables 规则命令。 */
@@ -53,7 +53,7 @@ class 防火墙规则管理器 @Inject constructor(private val 执行器: 特权
     /** 删除规则：真实执行 -D。 */
     fun 删除规则(编号: String): Boolean {
         val 规则 = 规则表.remove(编号) ?: return false
-        return try { val 命令 = 构造Iptables(规则.方向, 规则.协议, 规则.来源, 规则.目标, 规则.端口, 规则.动作).toMutableList(); val _idx = 命令.indexOf("-A"); if (_idx >= 0) 命令[_idx] = "-D"; 执行器.智能执行(命令, true).是否成功() } catch (_: Exception) { false }
+        return try { val 命令 = 构造Iptables(规则.方向, 规则.协议, 规则.来源, 规则.目标, 规则.端口, 规则.动作).toMutableList(); val _idx = 命令.indexOf("-A"); if (_idx >= 0) 命令[_idx] = "-D"; 执行器.智能执行(命令, true).是否成功() } catch (忽略: Exception) { false }
     }
 
     /** 设置默认策略：iptables -P。 */

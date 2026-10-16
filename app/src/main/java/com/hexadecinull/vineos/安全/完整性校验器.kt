@@ -205,7 +205,7 @@ object 完整性校验器 {
             val 签名 = 包.signatures?.firstOrNull() ?: return null
             val 摘要 = MessageDigest.getInstance("SHA-256")
             哈希工具.编码十六进制(摘要.digest(签名.toByteArray()))
-        } catch (_: Exception) { null }
+        } catch (忽略: Exception) { null }
     }
 
 /**

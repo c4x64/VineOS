@@ -98,7 +98,7 @@ object 安全报告工具 {
  * 注意：单项通过不代表整体安全，需组合判定。
  */
     fun 保存报告(路径: String, 报告: 安全报告): Boolean {
-        return try { File(路径).parentFile?.mkdirs(); File(路径).writeText(报告.渲染(), Charsets.UTF_8); true } catch (_: Exception) { false }
+        return try { File(路径).parentFile?.mkdirs(); File(路径).writeText(报告.渲染(), Charsets.UTF_8); true } catch (忽略: Exception) { false }
     }
 
 /**
@@ -112,7 +112,7 @@ object 安全报告工具 {
  * 注意：单项通过不代表整体安全，需组合判定。
  */
     fun 读取报告(路径: String): String? {
-        return try { val 文件 = File(路径); if (!文件.isFile) null else 文件.readText(Charsets.UTF_8) } catch (_: Exception) { null }
+        return try { val 文件 = File(路径); if (!文件.isFile) null else 文件.readText(Charsets.UTF_8) } catch (忽略: Exception) { null }
     }
 
 /**

@@ -86,7 +86,7 @@ class 批量加速器 @Inject constructor(
         if (!需要特权) return 执行器.同步执行(命令, 钳制)
         val 提权 = try {
             执行器.经Root执行(命令, 钳制)
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             null
         }
         if (提权 != null && 提权.是否成功()) return 提权
@@ -111,7 +111,7 @@ class 批量加速器 @Inject constructor(
             val 名 = 基 + 规则参数表.命名空间后缀(组)
             try {
                 if (!命名空间.检查存在(名)) 失败 += 名
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
                 失败 += 名
             }
         }
@@ -145,7 +145,7 @@ class 批量加速器 @Inject constructor(
             try {
                 val 状态 = 网卡.查询网卡状态(请求.宿主端)
                 if (状态 == null || !状态.运行中) 失败 += 请求.宿主端
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
                 失败 += 请求.宿主端
             }
         }
@@ -160,7 +160,7 @@ class 批量加速器 @Inject constructor(
         for (规格 in 规格组) {
             结果组 += try {
                 防火墙.添加规则(规格.方向, 规格.协议, 规格.来源, 规格.目标, 规格.端口, 规格.动作, 规格.优先级, 规格.备注)
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
                 防火墙.添加规则(规格.方向, 规格.协议, 规格.来源, 规格.目标, 规格.端口, 防火墙动作.丢弃, 规格.优先级, 规格.备注)
             }
         }
@@ -186,7 +186,7 @@ class 批量加速器 @Inject constructor(
         try {
             val 路径 = 缓存.探测二进制路径缓存("ip").绝对路径 ?: "ip"
             执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5L)
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
         }
         return 分配
     }
@@ -233,7 +233,7 @@ class 批量加速器 @Inject constructor(
             val 结果 = if (策略.需要特权) {
                 val 提权 = try {
                     执行器.经Root执行(命令, 钳制)
-                } catch (_: Exception) {
+                } catch (忽略: Exception) {
                     null
                 }
                 if (提权 != null && 提权.是否成功()) return 提权
@@ -246,7 +246,7 @@ class 批量加速器 @Inject constructor(
             if (轮次 < 策略.重试次) {
                 try {
                     Thread.sleep(命令辅助.计算指数退避(轮次))
-                } catch (_: InterruptedException) {
+                } catch (忽略: InterruptedException) {
                 }
             }
         }
@@ -271,7 +271,7 @@ class 批量加速器 @Inject constructor(
         for (偏移 in 0..5) {
             val 单条 = try {
                 转发.添加映射(实例标识 + "-" + 偏移, 转发协议.TCP, 起始宿主 + 偏移, 容器地址, 起始容器 + 偏移)
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
                 null
             }
             if (单条 != null) 结果组 += 单条
@@ -294,14 +294,14 @@ class 批量加速器 @Inject constructor(
         val 命名 = "vine-" + 实例标识.lowercase().replace("_", "-").take(20) + 规则参数表.命名空间后缀(组号)
         val 查询 = try {
             命名空间.查询网卡列表(命名)
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             emptyList()
         }
         val 路径 = 缓存.探测二进制路径缓存("ip").绝对路径 ?: "ip"
         查询.filter { it != "lo" }.forEach { 网卡名 ->
             try {
                 命名空间.在命名空间执行(命名, listOf(路径, "link", "delete", 网卡名), 超时夹紧器.变更超时(10L))
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
             }
         }
         val 结果 = 命名空间.删除命名空间(命名)
@@ -314,7 +314,7 @@ class 批量加速器 @Inject constructor(
         return try {
             val 编排 = 网络隔离编排单例.获取(执行器, 命名空间, 网卡, 地址, 转发, 防火墙, 流量)
             编排.健康检查(实例标识)
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             mapOf("已知" to false)
         }
     }
@@ -360,7 +360,7 @@ class 批量加速器 @Inject constructor(
         缓存.变更后失效(网卡 = 网卡名)
         return try {
             网卡.查询网卡状态(网卡名)?.运行中 == true
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             false
         }
     }

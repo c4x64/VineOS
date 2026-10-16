@@ -1,6 +1,5 @@
 package com.hexadecinull.vineos.data.repository
 
-import androidx.room.AutoMigration
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Delete
@@ -11,6 +10,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import androidx.room.Update
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.hexadecinull.vineos.data.models.VMInstance
 import com.hexadecinull.vineos.data.models.VMStatus
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +57,6 @@ interface VMInstanceDao {
 @Database(
     entities = [VMInstance::class],
     version = 2,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
     exportSchema = true,
 )
 @TypeConverters(VineConverters::class)
@@ -65,5 +65,13 @@ abstract class VineDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "vineos.db"
+
+        // v1 -> v2: VMInstance gains enableVpnIsolation. Explicit SQL so no
+        // exported schema snapshot is required and existing rows survive.
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE vm_instances ADD COLUMN enableVpnIsolation INTEGER NOT NULL DEFAULT 0")
+            }
+        }
     }
 }

@@ -30,7 +30,7 @@ class 流量统计器 @Inject constructor(private val 执行器: 特权命令执
             if (!兜底.是否成功()) return emptyList()
             return 解析ProcNetDev(兜底.标准输出)
         }
-        return try { 解析ProcNetDev(文件.readText()) } catch (_: Exception) { emptyList() }
+        return try { 解析ProcNetDev(文件.readText()) } catch (忽略: Exception) { emptyList() }
     }
 
     /** 解析 /proc/net/dev 文本。 */
@@ -51,7 +51,7 @@ class 流量统计器 @Inject constructor(private val 执行器: 特权命令执
     /** 采样单网卡并计算速率，真实读取两次。 */
     fun 采样速率(网卡: String, 间隔毫秒: Long = 1000): 流量速率? {
         val 第一次 = 读取系统流量().find { it.网卡 == 网卡 } ?: return null
-        try { Thread.sleep(间隔毫秒) } catch (_: InterruptedException) { }
+        try { Thread.sleep(间隔毫秒) } catch (忽略: InterruptedException) { }
         val 第二次 = 读取系统流量().find { it.网卡 == 网卡 } ?: return null
         val 秒 = (第二次.采样时间 - 第一次.采样时间).coerceAtLeast(1) / 1000.0
         val 下行 = (第二次.收字节 - 第一次.收字节).coerceAtLeast(0) / 秒
@@ -456,7 +456,7 @@ fun 流量统计器.格式化流量36(字节: Long): String {
 /** 第36组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值36(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -473,7 +473,7 @@ fun 流量统计器.格式化流量37(字节: Long): String {
 /** 第37组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值37(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -490,7 +490,7 @@ fun 流量统计器.格式化流量38(字节: Long): String {
 /** 第38组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值38(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -507,7 +507,7 @@ fun 流量统计器.格式化流量39(字节: Long): String {
 /** 第39组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值39(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -524,7 +524,7 @@ fun 流量统计器.格式化流量40(字节: Long): String {
 /** 第40组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值40(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -541,7 +541,7 @@ fun 流量统计器.格式化流量41(字节: Long): String {
 /** 第41组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值41(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -558,7 +558,7 @@ fun 流量统计器.格式化流量42(字节: Long): String {
 /** 第42组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值42(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -575,7 +575,7 @@ fun 流量统计器.格式化流量43(字节: Long): String {
 /** 第43组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值43(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -592,7 +592,7 @@ fun 流量统计器.格式化流量44(字节: Long): String {
 /** 第44组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值44(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -609,7 +609,7 @@ fun 流量统计器.格式化流量45(字节: Long): String {
 /** 第45组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值45(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -626,7 +626,7 @@ fun 流量统计器.格式化流量46(字节: Long): String {
 /** 第46组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值46(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -643,7 +643,7 @@ fun 流量统计器.格式化流量47(字节: Long): String {
 /** 第47组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值47(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -660,7 +660,7 @@ fun 流量统计器.格式化流量48(字节: Long): String {
 /** 第48组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值48(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -677,7 +677,7 @@ fun 流量统计器.格式化流量49(字节: Long): String {
 /** 第49组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值49(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -694,7 +694,7 @@ fun 流量统计器.格式化流量50(字节: Long): String {
 /** 第50组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值50(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -711,7 +711,7 @@ fun 流量统计器.格式化流量51(字节: Long): String {
 /** 第51组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值51(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -728,7 +728,7 @@ fun 流量统计器.格式化流量52(字节: Long): String {
 /** 第52组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值52(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -745,7 +745,7 @@ fun 流量统计器.格式化流量53(字节: Long): String {
 /** 第53组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值53(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -762,7 +762,7 @@ fun 流量统计器.格式化流量54(字节: Long): String {
 /** 第54组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值54(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -779,7 +779,7 @@ fun 流量统计器.格式化流量55(字节: Long): String {
 /** 第55组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值55(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -796,7 +796,7 @@ fun 流量统计器.格式化流量56(字节: Long): String {
 /** 第56组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值56(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -813,7 +813,7 @@ fun 流量统计器.格式化流量57(字节: Long): String {
 /** 第57组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值57(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -830,7 +830,7 @@ fun 流量统计器.格式化流量58(字节: Long): String {
 /** 第58组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值58(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -847,7 +847,7 @@ fun 流量统计器.格式化流量59(字节: Long): String {
 /** 第59组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值59(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -864,7 +864,7 @@ fun 流量统计器.格式化流量60(字节: Long): String {
 /** 第60组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值60(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -881,7 +881,7 @@ fun 流量统计器.格式化流量61(字节: Long): String {
 /** 第61组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值61(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -898,7 +898,7 @@ fun 流量统计器.格式化流量62(字节: Long): String {
 /** 第62组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值62(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -915,7 +915,7 @@ fun 流量统计器.格式化流量63(字节: Long): String {
 /** 第63组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值63(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -932,7 +932,7 @@ fun 流量统计器.格式化流量64(字节: Long): String {
 /** 第64组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值64(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -949,7 +949,7 @@ fun 流量统计器.格式化流量65(字节: Long): String {
 /** 第65组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值65(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -966,7 +966,7 @@ fun 流量统计器.格式化流量66(字节: Long): String {
 /** 第66组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值66(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -983,7 +983,7 @@ fun 流量统计器.格式化流量67(字节: Long): String {
 /** 第67组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值67(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1000,7 +1000,7 @@ fun 流量统计器.格式化流量68(字节: Long): String {
 /** 第68组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值68(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1017,7 +1017,7 @@ fun 流量统计器.格式化流量69(字节: Long): String {
 /** 第69组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值69(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1034,7 +1034,7 @@ fun 流量统计器.格式化流量70(字节: Long): String {
 /** 第70组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值70(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1051,7 +1051,7 @@ fun 流量统计器.格式化流量71(字节: Long): String {
 /** 第71组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值71(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1068,7 +1068,7 @@ fun 流量统计器.格式化流量72(字节: Long): String {
 /** 第72组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值72(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1085,7 +1085,7 @@ fun 流量统计器.格式化流量73(字节: Long): String {
 /** 第73组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值73(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1102,7 +1102,7 @@ fun 流量统计器.格式化流量74(字节: Long): String {
 /** 第74组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值74(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }
@@ -1119,7 +1119,7 @@ fun 流量统计器.格式化流量75(字节: Long): String {
 /** 第75组阈值告警：采样速率超限返回告警（真实采样）。 */
 fun 流量统计器.检查阈值75(网卡: String, 阈值字节每秒: Double = 1048576.0): 流量告警 {
     val 快照 = 读取系统流量().find { it.网卡 == 网卡 }
-    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (_: Exception) { null }
+    val 上次 = try { 查询前缀流量36("v").firstOrNull() } catch (忽略: Exception) { null }
     val 速率 = if (快照 != null) 快照.收字节.toDouble() / 1024.0 else 0.0
     return 流量告警(网卡, 阈值字节每秒, 速率 > 阈值字节每秒, 速率)
 }

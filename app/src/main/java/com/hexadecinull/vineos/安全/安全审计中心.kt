@@ -39,12 +39,12 @@ object 安全审计中心 {
  * 注意：耗时操作请放在 Dispatchers.IO，切勿阻塞主线程。
  */
     fun 执行一键审计(上下文: Context): 审计汇总 {
-        val 权限摘要 = try { 权限审计器.审计摘要(上下文) } catch (_: Exception) { "权限审计失败" }
-        val 沙箱报告 = try { 沙箱检查器.生成报告(上下文) } catch (_: Exception) { "沙箱检查失败" }
-        val 门禁 = try { 安全策略.执行门禁(上下文) } catch (_: Exception) { null }
+        val 权限摘要 = try { 权限审计器.审计摘要(上下文) } catch (忽略: Exception) { "权限审计失败" }
+        val 沙箱报告 = try { 沙箱检查器.生成报告(上下文) } catch (忽略: Exception) { "沙箱检查失败" }
+        val 门禁 = try { 安全策略.执行门禁(上下文) } catch (忽略: Exception) { null }
         val 门禁摘要 = 门禁?.摘要() ?: "门禁执行失败"
-        val 完整性摘要 = try { 完整性校验器.校验文件存在(上下文.packageCodePath ?: "").说明 } catch (_: Exception) { "完整性检查失败" }
-        val 分数 = try { 沙箱检查器.综合评分(上下文) } catch (_: Exception) { 0 }
+        val 完整性摘要 = try { 完整性校验器.校验文件存在(上下文.packageCodePath ?: "").说明 } catch (忽略: Exception) { "完整性检查失败" }
+        val 分数 = try { 沙箱检查器.综合评分(上下文) } catch (忽略: Exception) { 0 }
         val 等级 = when { 门禁 != null && !门禁.放行 -> 审计等级.拦截; 分数 < 60 -> 审计等级.警告; else -> 审计等级.通过 }
         return 审计汇总(等级, 分数, 权限摘要, 沙箱报告, 门禁摘要, 完整性摘要)
     }
@@ -62,7 +62,7 @@ object 安全审计中心 {
     fun 是否放行启动(上下文: Context): Boolean {
         // 复用单次审计结论：执行一键审计内部已求值门禁，旧实现再调执行门禁一次，
         // 重复包管理＋文件 I/O，直接以汇总判定；门禁求值失败保持保守拒绝。
-        val 汇总 = try { 执行一键审计(上下文) } catch (_: Exception) { return false }
+        val 汇总 = try { 执行一键审计(上下文) } catch (忽略: Exception) { return false }
         if (汇总.等级 == 审计等级.拦截) return false
         if (汇总.门禁摘要 == "门禁执行失败") return false
         return true
@@ -84,7 +84,7 @@ object 安全审计中心 {
             File(路径).parentFile?.mkdirs()
             File(路径).writeText(汇总.渲染(), Charsets.UTF_8)
             true
-        } catch (_: Exception) { false }
+        } catch (忽略: Exception) { false }
     }
 
 /**
@@ -98,7 +98,7 @@ object 安全审计中心 {
  * 注意：耗时操作请放在 Dispatchers.IO，切勿阻塞主线程。
  */
     fun 读取审计(路径: String): String? {
-        return try { val 文件 = File(路径); if (!文件.isFile) null else 文件.readText(Charsets.UTF_8) } catch (_: Exception) { null }
+        return try { val 文件 = File(路径); if (!文件.isFile) null else 文件.readText(Charsets.UTF_8) } catch (忽略: Exception) { null }
     }
 
 /**
@@ -128,7 +128,7 @@ object 安全审计中心 {
  * 注意：耗时操作请放在 Dispatchers.IO，切勿阻塞主线程。
  */
     fun 取审计分数(上下文: Context): Int {
-        return try { 执行一键审计(上下文).分数 } catch (_: Exception) { 0 }
+        return try { 执行一键审计(上下文).分数 } catch (忽略: Exception) { 0 }
     }
 
 /**
@@ -142,7 +142,7 @@ object 安全审计中心 {
  * 注意：耗时操作请放在 Dispatchers.IO，切勿阻塞主线程。
  */
     fun 取审计等级(上下文: Context): 审计等级 {
-        return try { 执行一键审计(上下文).等级 } catch (_: Exception) { 审计等级.拦截 }
+        return try { 执行一键审计(上下文).等级 } catch (忽略: Exception) { 审计等级.拦截 }
     }
 
 /**

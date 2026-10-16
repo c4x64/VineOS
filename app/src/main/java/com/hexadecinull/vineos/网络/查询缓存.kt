@@ -122,7 +122,7 @@ class 查询缓存加速器 @Inject constructor(private val 执行器: 特权命
         val 条目 = 获取("命名空间列表", 查询生存期.命名空间列表) {
             val 名单 = try {
                 命名空间.列出命名空间()
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
                 emptyList()
             }
             Pair(名单.joinToString("\n"), true)
@@ -183,7 +183,7 @@ class 查询缓存加速器 @Inject constructor(private val 执行器: 特权命
         val 文本 = 获取("系统流量", 查询生存期.系统流量) {
             val 列表 = try {
                 流量器.读取系统流量()
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
                 emptyList()
             }
             Pair(列表.joinToString("\n") { it.网卡 + " " + it.收字节 + " " + it.发字节 + " " + it.收包 + " " + it.发包 }, true)

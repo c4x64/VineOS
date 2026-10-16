@@ -276,7 +276,7 @@ object 哈希工具 {
  * 示例：val 结果 = 完整性校验器.校验文件哈希(路径)。
  * 注意：比较哈希必须用常数时间函数，禁止直接 ==。
  */
-    fun 校验文件哈希(路径: String, 期望: String): Boolean { return try { 比较哈希(计算文件沙256(路径), 期望) } catch (_: Exception) { false } }
+    fun 校验文件哈希(路径: String, 期望: String): Boolean { return try { 比较哈希(计算文件沙256(路径), 期望) } catch (忽略: Exception) { false } }
 
 /**
  * 功能：校验字符串哈希。
@@ -483,7 +483,7 @@ object 哈希工具 {
  * 示例：val 结果 = 完整性校验器.校验文件哈希(路径)。
  * 注意：比较哈希必须用常数时间函数，禁止直接 ==。
  */
-    fun 文件是否变化(路径: String, 旧哈希: String): Boolean { return try { !比较哈希(计算文件沙256(路径), 旧哈希) } catch (_: Exception) { true } }
+    fun 文件是否变化(路径: String, 旧哈希: String): Boolean { return try { !比较哈希(计算文件沙256(路径), 旧哈希) } catch (忽略: Exception) { true } }
 
 /**
  * 功能：分块哈希。
@@ -520,7 +520,7 @@ object 哈希工具 {
                 }
                 if (剩余 != 0L) "" else 编码十六进制(摘要.digest())
             }
-        } catch (_: Exception) { "" }
+        } catch (忽略: Exception) { "" }
     }
 
 }

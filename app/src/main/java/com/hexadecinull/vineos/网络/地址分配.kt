@@ -59,7 +59,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
         租约表[实例标识] = 租约
         持久化()
         // 真实生效：经 ip route 检查网段可达（只读不变更）
-        try { 执行器.同步执行(listOf(执行器.探测二进制路径("ip").绝对路径 ?: "ip", "route", "get", 租约.容器地址)) } catch (_: Exception) { }
+        try { 执行器.同步执行(listOf(执行器.探测二进制路径("ip").绝对路径 ?: "ip", "route", "get", 租约.容器地址)) } catch (忽略: Exception) { }
         return 租约
     }
 
@@ -71,9 +71,9 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
     fun 获取池状态(): 地址池状态 = 地址池状态(基网段, 租约表.size, 254 - 租约表.size, 序号器.get(), 租约表.values.sortedBy { it.序号 })
 
     /** 持久化租约到文件（若已设置路径），真实写盘。 */
-    fun 持久化() { val 文件 = 持久化文件 ?: return; try { 文件.parentFile?.mkdirs(); 文件.writeText(租约表.values.joinToString("\n") { it.实例标识 + "," + it.子网 + "," + it.容器地址 + "," + it.序号 }) } catch (_: Exception) { } }
+    fun 持久化() { val 文件 = 持久化文件 ?: return; try { 文件.parentFile?.mkdirs(); 文件.writeText(租约表.values.joinToString("\n") { it.实例标识 + "," + it.子网 + "," + it.容器地址 + "," + it.序号 }) } catch (忽略: Exception) { } }
     /** 从文件恢复租约，真实读盘。 */
-    fun 恢复() { val 文件 = 持久化文件 ?: return; if (!文件.exists()) return; try { 文件.readLines().forEach { 行 -> val 段 = 行.split(","); if (段.size == 4) { val 序号 = 段[3].toIntOrNull() ?: return@forEach; 已用序号.add(序号); 租约表[段[0]] = 地址租约(段[0], 段[1], "", 段[2], System.currentTimeMillis(), 序号) } } } catch (_: Exception) { } }
+    fun 恢复() { val 文件 = 持久化文件 ?: return; if (!文件.exists()) return; try { 文件.readLines().forEach { 行 -> val 段 = 行.split(","); if (段.size == 4) { val 序号 = 段[3].toIntOrNull() ?: return@forEach; 已用序号.add(序号); 租约表[段[0]] = 地址租约(段[0], 段[1], "", 段[2], System.currentTimeMillis(), 序号) } } } catch (忽略: Exception) { } }
 
     /** 第01组地址工具：计算序号01子网的网关/容器/广播并校验可达性（真实执行 ping 预检）。 */
     fun 子网预检01(): 子网分配 {
@@ -84,7 +84,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第01组掩码换算：前缀转点分掩码。 */
@@ -102,7 +102,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第02组掩码换算：前缀转点分掩码。 */
@@ -120,7 +120,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第03组掩码换算：前缀转点分掩码。 */
@@ -138,7 +138,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第04组掩码换算：前缀转点分掩码。 */
@@ -156,7 +156,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第05组掩码换算：前缀转点分掩码。 */
@@ -174,7 +174,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第06组掩码换算：前缀转点分掩码。 */
@@ -192,7 +192,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第07组掩码换算：前缀转点分掩码。 */
@@ -210,7 +210,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第08组掩码换算：前缀转点分掩码。 */
@@ -228,7 +228,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第09组掩码换算：前缀转点分掩码。 */
@@ -246,7 +246,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第10组掩码换算：前缀转点分掩码。 */
@@ -264,7 +264,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第11组掩码换算：前缀转点分掩码。 */
@@ -282,7 +282,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第12组掩码换算：前缀转点分掩码。 */
@@ -300,7 +300,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第13组掩码换算：前缀转点分掩码。 */
@@ -318,7 +318,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第14组掩码换算：前缀转点分掩码。 */
@@ -336,7 +336,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第15组掩码换算：前缀转点分掩码。 */
@@ -354,7 +354,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第16组掩码换算：前缀转点分掩码。 */
@@ -372,7 +372,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第17组掩码换算：前缀转点分掩码。 */
@@ -390,7 +390,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第18组掩码换算：前缀转点分掩码。 */
@@ -408,7 +408,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第19组掩码换算：前缀转点分掩码。 */
@@ -426,7 +426,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第20组掩码换算：前缀转点分掩码。 */
@@ -444,7 +444,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第21组掩码换算：前缀转点分掩码。 */
@@ -462,7 +462,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第22组掩码换算：前缀转点分掩码。 */
@@ -480,7 +480,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第23组掩码换算：前缀转点分掩码。 */
@@ -498,7 +498,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第24组掩码换算：前缀转点分掩码。 */
@@ -516,7 +516,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第25组掩码换算：前缀转点分掩码。 */
@@ -534,7 +534,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第26组掩码换算：前缀转点分掩码。 */
@@ -552,7 +552,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第27组掩码换算：前缀转点分掩码。 */
@@ -570,7 +570,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第28组掩码换算：前缀转点分掩码。 */
@@ -588,7 +588,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第29组掩码换算：前缀转点分掩码。 */
@@ -606,7 +606,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第30组掩码换算：前缀转点分掩码。 */
@@ -624,7 +624,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第31组掩码换算：前缀转点分掩码。 */
@@ -642,7 +642,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第32组掩码换算：前缀转点分掩码。 */
@@ -660,7 +660,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第33组掩码换算：前缀转点分掩码。 */
@@ -678,7 +678,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第34组掩码换算：前缀转点分掩码。 */
@@ -696,7 +696,7 @@ class 地址分配器 @Inject constructor(private val 执行器: 特权命令执
             val 路径 = 执行器.探测二进制路径("ip").绝对路径 ?: "ip"
             val 检查 = 执行器.同步执行(listOf(路径, "route", "get", 分配.容器地址CIDR.substringBefore("/")), 5)
             if (详细开关) println("预检" + 分配.基地址 + ":" + 检查.退出码)
-        } catch (_: Exception) { }
+        } catch (忽略: Exception) { }
         return 分配
     }
     /** 第35组掩码换算：前缀转点分掩码。 */

@@ -42,7 +42,7 @@ object 沙箱检查器 {
  */
     fun 检查Root管理应用(上下文: Context): Boolean {
         val 可疑 = listOf("com.topjohnwu.magisk", "com.koushikdutta.superuser", "eu.chainfire.supersu", "com.noshufou.android.su")
-        return try { 可疑.any { 包 -> try { 上下文.packageManager.getPackageInfo(包, 0); true } catch (_: Exception) { false } } } catch (_: Exception) { false }
+        return try { 可疑.any { 包 -> try { 上下文.packageManager.getPackageInfo(包, 0); true } catch (忽略: Exception) { false } } } catch (忽略: Exception) { false }
     }
 
 /**
@@ -97,7 +97,7 @@ object 沙箱检查器 {
                 }
                 false
             }
-        } catch (_: Exception) { false }
+        } catch (忽略: Exception) { false }
     }
 
 /**
@@ -113,7 +113,7 @@ object 沙箱检查器 {
     fun 检查代理(上下文: Context): Boolean {
         val 代理主机 = System.getProperty("http.proxyHost")
         if (!代理主机.isNullOrEmpty()) return true
-        return try { android.net.Proxy.getDefaultHost()?.isNotEmpty() == true } catch (_: Exception) { false }
+        return try { android.net.Proxy.getDefaultHost()?.isNotEmpty() == true } catch (忽略: Exception) { false }
     }
 
 /**
@@ -230,7 +230,7 @@ object 沙箱检查器 {
     fun 生成报告(上下文: Context): String {
         // 单遍求值：四项检查各算一次，评分复用结果；旧实现综合评分调两次＋重复 I/O。
         val 有Root文件 = 检查Root可执行文件()
-        val 有Root应用 = try { 检查Root管理应用(上下文) } catch (_: Exception) { false }
+        val 有Root应用 = try { 检查Root管理应用(上下文) } catch (忽略: Exception) { false }
         val 有调试器 = 检查调试器()
         val 可写系统区 = 检查可写系统区()
         val 是模拟器 = 检查模拟器()
@@ -316,7 +316,7 @@ object 沙箱检查器 {
  * 注意：单项通过不代表整体安全，需组合判定。
  */
     fun 检查开发者选项(上下文: Context): Boolean {
-        return try { Settings.Secure.getInt(上下文.contentResolver, Settings.Secure.ADB_ENABLED, 0) == 1 } catch (_: Exception) { false }
+        return try { Settings.Secure.getInt(上下文.contentResolver, Settings.Secure.ADB_ENABLED, 0) == 1 } catch (忽略: Exception) { false }
     }
 
 /**
@@ -330,7 +330,7 @@ object 沙箱检查器 {
  * 注意：单项通过不代表整体安全，需组合判定。
  */
     fun 检查未知来源(上下文: Context): Boolean {
-        return try { Settings.Secure.getInt(上下文.contentResolver, Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1 } catch (_: Exception) { false }
+        return try { Settings.Secure.getInt(上下文.contentResolver, Settings.Secure.INSTALL_NON_MARKET_APPS, 0) == 1 } catch (忽略: Exception) { false }
     }
 
 }

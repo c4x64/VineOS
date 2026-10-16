@@ -25,9 +25,9 @@ object 原生安全桥接 {
         原生可用 = try {
             System.loadLibrary("vine_runtime")
             桥接版本().isNotEmpty()
-        } catch (_: UnsatisfiedLinkError) {
+        } catch (忽略: UnsatisfiedLinkError) {
             false
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             false
         }
     }
@@ -43,14 +43,14 @@ object 原生安全桥接 {
             try {
                 val 原生 = 原生计算文件哈希(路径)
                 if (原生.isNotEmpty()) return 原生
-            } catch (_: UnsatisfiedLinkError) {
+            } catch (忽略: UnsatisfiedLinkError) {
                 原生可用 = false
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
             }
         }
         return try {
             哈希工具.计算文件沙256(路径)
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             ""
         }
     }
@@ -66,14 +66,14 @@ object 原生安全桥接 {
             try {
                 val 分 = 原生沙箱评分()
                 if (分 in 0..100) return 分
-            } catch (_: UnsatisfiedLinkError) {
+            } catch (忽略: UnsatisfiedLinkError) {
                 原生可用 = false
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
             }
         }
         return try {
             沙箱检查器.综合评分(上下文)
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             0
         }
     }
@@ -89,9 +89,9 @@ object 原生安全桥接 {
         if (原生可用) {
             try {
                 return 原生原子写入文本(路径, 内容)
-            } catch (_: UnsatisfiedLinkError) {
+            } catch (忽略: UnsatisfiedLinkError) {
                 原生可用 = false
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
                 return -1
             }
         }
@@ -109,9 +109,9 @@ object 原生安全桥接 {
             try {
                 val 规范 = 原生规范化路径(原始)
                 if (规范.isNotEmpty()) return 规范
-            } catch (_: UnsatisfiedLinkError) {
+            } catch (忽略: UnsatisfiedLinkError) {
                 原生可用 = false
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
             }
         }
         return 原始
@@ -129,14 +129,14 @@ object 原生安全桥接 {
             try {
                 val 原生 = 原生计算HMAC(密钥, 消息)
                 if (原生.isNotEmpty()) return 原生
-            } catch (_: UnsatisfiedLinkError) {
+            } catch (忽略: UnsatisfiedLinkError) {
                 原生可用 = false
-            } catch (_: Exception) {
+            } catch (忽略: Exception) {
             }
         }
         return try {
             哈希工具.计算字符串HMAC(密钥, 消息)
-        } catch (_: Exception) {
+        } catch (忽略: Exception) {
             ""
         }
     }

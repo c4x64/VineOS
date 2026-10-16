@@ -16,7 +16,7 @@ object AbiCompat {
     // Build.SUPPORTED_ABIS can be null or fail to resolve under the JVM unit test stub, so it's read through this guard instead of inline
     private fun currentHostAbis(): List<String> = try {
         Build.SUPPORTED_ABIS?.toList().orEmpty()
-    } catch (_: Throwable) {
+    } catch (忽略: Throwable) {
         emptyList()
     }
 

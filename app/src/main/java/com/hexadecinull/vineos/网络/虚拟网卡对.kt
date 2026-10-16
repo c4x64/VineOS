@@ -33,7 +33,7 @@ class 虚拟网卡管理器 @Inject constructor(private val 执行器: 特权命
     }
 
     /** 静默删除网卡，忽略不存在错误。 */
-    fun 删除网卡静默(网卡: String) { try { 执行器.智能执行(listOf(命令路径(), "link", "delete", 网卡), true) } catch (_: Exception) { } }
+    fun 删除网卡静默(网卡: String) { try { 执行器.智能执行(listOf(命令路径(), "link", "delete", 网卡), true) } catch (忽略: Exception) { } }
 
     /** 将容器端移入命名空间：ip link set <c> netns <ns>。 */
     fun 移入命名空间(容器端: String, 命名: String): 网络命令结果 {
@@ -788,133 +788,133 @@ class 虚拟网卡管理器 @Inject constructor(private val 执行器: 特权命
 /** 网卡诊断附录：连通性与自检（真实执行）。 */
 /** 附录60：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体60(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录61：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体61(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录62：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体62(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录63：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体63(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录64：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体64(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录65：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体65(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录66：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体66(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录67：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体67(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录68：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体68(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录69：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体69(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录70：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体70(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录71：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体71(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录72：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体72(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录73：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体73(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录74：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体74(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录75：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体75(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录76：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体76(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录77：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体77(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录78：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体78(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录79：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体79(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录80：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体80(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 
 /** 附录81：系统自检变体（真实执行 ip 或 ping）。 */
 fun 虚拟网卡管理器.诊断变体81(网卡: String): String {
-    val 状态 = try { 查询网卡状态(网卡) } catch (_: Exception) { null }
+    val 状态 = try { 查询网卡状态(网卡) } catch (忽略: Exception) { null }
     return 状态?.toString() ?: "网卡不存在：" + 网卡
 }
 

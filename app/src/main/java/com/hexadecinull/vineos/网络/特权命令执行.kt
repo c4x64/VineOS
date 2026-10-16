@@ -146,13 +146,13 @@ class 特权命令执行器 @Inject constructor() {
                 try { BufferedReader(InputStreamReader(进程.inputStream)).use { 读入 ->
                     var 行 = 读入.readLine()
                     while (行 != null) { 标准输出缓冲.append(行).append('\n'); 行 = 读入.readLine() }
-                } } catch (_: Exception) { }
+                } } catch (忽略: Exception) { }
             }
             val 错误线程 = Thread {
                 try { BufferedReader(InputStreamReader(进程.errorStream)).use { 读入 ->
                     var 行 = 读入.readLine()
                     while (行 != null) { 错误输出缓冲.append(行).append('\n'); 行 = 读入.readLine() }
-                } } catch (_: Exception) { }
+                } } catch (忽略: Exception) { }
             }
             输出线程.isDaemon = true; 错误线程.isDaemon = true
             输出线程.start(); 错误线程.start()
@@ -161,9 +161,9 @@ class 特权命令执行器 @Inject constructor() {
             var 退出码 = -1
             if (!按时结束) { 超时 = true; 进程.destroyForcibly(); 进程.waitFor(5, TimeUnit.SECONDS) } else { 退出码 = 进程.exitValue() }
             输出线程.join(2000); 错误线程.join(2000)
-            try { 进程.inputStream.close() } catch (_: Exception) { }
-            try { 进程.errorStream.close() } catch (_: Exception) { }
-            try { 进程.outputStream.close() } catch (_: Exception) { }
+            try { 进程.inputStream.close() } catch (忽略: Exception) { }
+            try { 进程.errorStream.close() } catch (忽略: Exception) { }
+            try { 进程.outputStream.close() } catch (忽略: Exception) { }
             网络命令结果(退出码, 标准输出缓冲.toString().trimEnd(), 错误输出缓冲.toString().trimEnd(), System.currentTimeMillis() - 起始, 超时, 命令)
         } catch (异常: Exception) {
             网络命令结果(-1, "", (异常.message ?: "启动进程失败"), System.currentTimeMillis() - 起始, false, 命令)
@@ -178,7 +178,7 @@ class 特权命令执行器 @Inject constructor() {
             val 结果 = 同步执行(命令, 超时秒)
             if (结果.是否成功()) return 结果
             最后 = 结果
-            if (轮 < 重试次) { try { Thread.sleep(退避毫秒) } catch (_: InterruptedException) { }; 退避毫秒 *= 2 }
+            if (轮 < 重试次) { try { Thread.sleep(退避毫秒) } catch (忽略: InterruptedException) { }; 退避毫秒 *= 2 }
         }
         return 最后!!
     }
@@ -198,7 +198,7 @@ class 特权命令执行器 @Inject constructor() {
                 val 直接 = File(路径); if (直接.isAbsolute && 直接.canExecute()) { val 信息 = 二进制可用性(二进制名, 路径, true, 查询二进制版本(路径)); 可用性缓存[二进制名] = 信息; return 信息 }
                 val 探测 = 同步执行(listOf(路径, "--help"), 5)
                 if (!探测.是否超时 && (探测.退出码 == 0 || 探测.标准输出.isNotEmpty())) { val 信息 = 二进制可用性(二进制名, 路径, true, 查询二进制版本(路径)); 可用性缓存[二进制名] = 信息; return 信息 }
-            } catch (_: Exception) { }
+            } catch (忽略: Exception) { }
         }
         val 缺失 = 二进制可用性(二进制名, null, false, ""); 可用性缓存[二进制名] = 缺失; return 缺失
     }
@@ -213,7 +213,7 @@ class 特权命令执行器 @Inject constructor() {
 
     /** 执行 su -c id 判断 uid=0。 */
     fun 检查Root可用(): Boolean {
-        return try { val 结果 = 同步执行(listOf("su", "-c", "id"), 5); 结果.是否成功() && 结果.标准输出.contains("uid=0") } catch (_: Exception) { false }
+        return try { val 结果 = 同步执行(listOf("su", "-c", "id"), 5); 结果.是否成功() && 结果.标准输出.contains("uid=0") } catch (忽略: Exception) { false }
     }
 
     /** 预留 Shizuku 通道探测，当前经系统服务判断。 */
@@ -258,7 +258,7 @@ class 特权命令执行器 @Inject constructor() {
     /** 智能提权：优先 Root，降级普通通道，保证在非 Root 机也能查询状态。 */
     fun 智能执行(命令: List<String>, 需要特权: Boolean): 网络命令结果 {
         if (!需要特权) return 同步执行(命令)
-        val 提权结果 = try { 经Root执行(命令) } catch (_: Exception) { null }
+        val 提权结果 = try { 经Root执行(命令) } catch (忽略: Exception) { null }
         if (提权结果 != null && 提权结果.是否成功()) return 提权结果
         return 同步执行(命令)
     }
@@ -391,7 +391,7 @@ fun 特权命令执行器.快捷执行01(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行01失败：" + 最后错误, 0, false, 命令)
 }
@@ -405,7 +405,7 @@ fun 特权命令执行器.快捷执行02(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行02失败：" + 最后错误, 0, false, 命令)
 }
@@ -419,7 +419,7 @@ fun 特权命令执行器.快捷执行03(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行03失败：" + 最后错误, 0, false, 命令)
 }
@@ -433,7 +433,7 @@ fun 特权命令执行器.快捷执行04(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行04失败：" + 最后错误, 0, false, 命令)
 }
@@ -447,7 +447,7 @@ fun 特权命令执行器.快捷执行05(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行05失败：" + 最后错误, 0, false, 命令)
 }
@@ -461,7 +461,7 @@ fun 特权命令执行器.快捷执行06(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行06失败：" + 最后错误, 0, false, 命令)
 }
@@ -475,7 +475,7 @@ fun 特权命令执行器.快捷执行07(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行07失败：" + 最后错误, 0, false, 命令)
 }
@@ -489,7 +489,7 @@ fun 特权命令执行器.快捷执行08(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行08失败：" + 最后错误, 0, false, 命令)
 }
@@ -503,7 +503,7 @@ fun 特权命令执行器.快捷执行09(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行09失败：" + 最后错误, 0, false, 命令)
 }
@@ -517,7 +517,7 @@ fun 特权命令执行器.快捷执行10(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行10失败：" + 最后错误, 0, false, 命令)
 }
@@ -531,7 +531,7 @@ fun 特权命令执行器.快捷执行11(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行11失败：" + 最后错误, 0, false, 命令)
 }
@@ -545,7 +545,7 @@ fun 特权命令执行器.快捷执行12(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行12失败：" + 最后错误, 0, false, 命令)
 }
@@ -559,7 +559,7 @@ fun 特权命令执行器.快捷执行13(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行13失败：" + 最后错误, 0, false, 命令)
 }
@@ -573,7 +573,7 @@ fun 特权命令执行器.快捷执行14(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行14失败：" + 最后错误, 0, false, 命令)
 }
@@ -587,7 +587,7 @@ fun 特权命令执行器.快捷执行15(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行15失败：" + 最后错误, 0, false, 命令)
 }
@@ -601,7 +601,7 @@ fun 特权命令执行器.快捷执行16(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行16失败：" + 最后错误, 0, false, 命令)
 }
@@ -615,7 +615,7 @@ fun 特权命令执行器.快捷执行17(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行17失败：" + 最后错误, 0, false, 命令)
 }
@@ -629,7 +629,7 @@ fun 特权命令执行器.快捷执行18(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行18失败：" + 最后错误, 0, false, 命令)
 }
@@ -643,7 +643,7 @@ fun 特权命令执行器.快捷执行19(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行19失败：" + 最后错误, 0, false, 命令)
 }
@@ -657,7 +657,7 @@ fun 特权命令执行器.快捷执行20(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行20失败：" + 最后错误, 0, false, 命令)
 }
@@ -671,7 +671,7 @@ fun 特权命令执行器.快捷执行21(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行21失败：" + 最后错误, 0, false, 命令)
 }
@@ -685,7 +685,7 @@ fun 特权命令执行器.快捷执行22(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行22失败：" + 最后错误, 0, false, 命令)
 }
@@ -699,7 +699,7 @@ fun 特权命令执行器.快捷执行23(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行23失败：" + 最后错误, 0, false, 命令)
 }
@@ -713,7 +713,7 @@ fun 特权命令执行器.快捷执行24(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行24失败：" + 最后错误, 0, false, 命令)
 }
@@ -727,7 +727,7 @@ fun 特权命令执行器.快捷执行25(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行25失败：" + 最后错误, 0, false, 命令)
 }
@@ -741,7 +741,7 @@ fun 特权命令执行器.快捷执行26(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行26失败：" + 最后错误, 0, false, 命令)
 }
@@ -755,7 +755,7 @@ fun 特权命令执行器.快捷执行27(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行27失败：" + 最后错误, 0, false, 命令)
 }
@@ -769,7 +769,7 @@ fun 特权命令执行器.快捷执行28(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行28失败：" + 最后错误, 0, false, 命令)
 }
@@ -783,7 +783,7 @@ fun 特权命令执行器.快捷执行29(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行29失败：" + 最后错误, 0, false, 命令)
 }
@@ -797,7 +797,7 @@ fun 特权命令执行器.快捷执行30(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行30失败：" + 最后错误, 0, false, 命令)
 }
@@ -811,7 +811,7 @@ fun 特权命令执行器.快捷执行31(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行31失败：" + 最后错误, 0, false, 命令)
 }
@@ -825,7 +825,7 @@ fun 特权命令执行器.快捷执行32(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行32失败：" + 最后错误, 0, false, 命令)
 }
@@ -839,7 +839,7 @@ fun 特权命令执行器.快捷执行33(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行33失败：" + 最后错误, 0, false, 命令)
 }
@@ -853,7 +853,7 @@ fun 特权命令执行器.快捷执行34(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行34失败：" + 最后错误, 0, false, 命令)
 }
@@ -867,7 +867,7 @@ fun 特权命令执行器.快捷执行35(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行35失败：" + 最后错误, 0, false, 命令)
 }
@@ -881,7 +881,7 @@ fun 特权命令执行器.快捷执行36(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行36失败：" + 最后错误, 0, false, 命令)
 }
@@ -895,7 +895,7 @@ fun 特权命令执行器.快捷执行37(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行37失败：" + 最后错误, 0, false, 命令)
 }
@@ -909,7 +909,7 @@ fun 特权命令执行器.快捷执行38(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行38失败：" + 最后错误, 0, false, 命令)
 }
@@ -923,7 +923,7 @@ fun 特权命令执行器.快捷执行39(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行39失败：" + 最后错误, 0, false, 命令)
 }
@@ -937,7 +937,7 @@ fun 特权命令执行器.快捷执行40(命令: List<String>): 网络命令结�
         val 结果 = if (策略.需要特权) 智能执行(命令, true) else 同步执行(命令, 策略.超时秒)
         if (结果.是否成功()) return 结果
         最后错误 = 结果.错误输出
-        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (_: InterruptedException) { } }
+        if (轮次 < 策略.重试次) { try { Thread.sleep(命令辅助.计算指数退避(轮次)) } catch (忽略: InterruptedException) { } }
     }
     return 网络命令结果(-1, "", "快捷执行40失败：" + 最后错误, 0, false, 命令)
 }

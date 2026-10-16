@@ -73,7 +73,7 @@ object 密钥管理 {
             密码器.init(Cipher.ENCRYPT_MODE, SecretKeySpec(密钥, "AES"), GCMParameterSpec(标签位长, 向量))
             val 密文 = 密码器.doFinal(明文)
             向量 + 密文
-        } catch (_: Exception) { null }
+        } catch (忽略: Exception) { null }
     }
 
 /**
@@ -95,7 +95,7 @@ object 密钥管理 {
             val 密码器 = Cipher.getInstance("AES/GCM/NoPadding")
             密码器.init(Cipher.DECRYPT_MODE, SecretKeySpec(密钥, "AES"), GCMParameterSpec(标签位长, 向量))
             密码器.doFinal(密文)
-        } catch (_: Exception) { null }
+        } catch (忽略: Exception) { null }
     }
 
 /**
@@ -126,7 +126,7 @@ object 密钥管理 {
     fun 解密字符串(密钥: ByteArray, 十六进制: String): String? {
         val 组合 = 哈希工具.解码十六进制(十六进制) ?: return null
         val 明文 = 解密(密钥, 组合) ?: return null
-        return try { String(明文, Charsets.UTF_8) } catch (_: Exception) { null }
+        return try { String(明文, Charsets.UTF_8) } catch (忽略: Exception) { null }
     }
 
 /**
@@ -141,7 +141,7 @@ object 密钥管理 {
  */
     fun 保存密钥(路径: String, 密钥: ByteArray): Boolean {
         if (密钥.size != 16 && 密钥.size != 32) return false
-        return try { File(路径).parentFile?.mkdirs(); File(路径).writeText(哈希工具.编码十六进制(密钥), Charsets.UTF_8); true } catch (_: Exception) { false }
+        return try { File(路径).parentFile?.mkdirs(); File(路径).writeText(哈希工具.编码十六进制(密钥), Charsets.UTF_8); true } catch (忽略: Exception) { false }
     }
 
 /**
@@ -155,7 +155,7 @@ object 密钥管理 {
  * 注意：密钥长度必须为 16 或 32 字节，否则返回空。
  */
     fun 读取密钥(路径: String): ByteArray? {
-        return try { val 文件 = File(路径); if (!文件.isFile) null else 哈希工具.解码十六进制(文件.readText(Charsets.UTF_8).trim()) } catch (_: Exception) { null }
+        return try { val 文件 = File(路径); if (!文件.isFile) null else 哈希工具.解码十六进制(文件.readText(Charsets.UTF_8).trim()) } catch (忽略: Exception) { null }
     }
 
 /**
@@ -213,7 +213,7 @@ object 密钥管理 {
  * 注意：密钥长度必须为 16 或 32 字节，否则返回空。
  */
     fun 删除密钥(路径: String): Boolean {
-        return try { val 文件 = File(路径); if (!文件.exists()) true else 文件.delete() } catch (_: Exception) { false }
+        return try { val 文件 = File(路径); if (!文件.exists()) true else 文件.delete() } catch (忽略: Exception) { false }
     }
 
 /**
@@ -245,7 +245,7 @@ object 密钥管理 {
  * 注意：密钥长度必须为 16 或 32 字节，否则返回空。
  */
     fun 校验算法可用(): Boolean {
-        return try { Cipher.getInstance("AES/GCM/NoPadding"); true } catch (_: Exception) { false }
+        return try { Cipher.getInstance("AES/GCM/NoPadding"); true } catch (忽略: Exception) { false }
     }
 
 /**

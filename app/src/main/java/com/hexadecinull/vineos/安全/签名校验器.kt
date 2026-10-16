@@ -44,7 +44,7 @@ object 签名校验器 {
                 val 信息 = 上下文.packageManager.getPackageInfo(包名, PackageManager.GET_SIGNATURES)
                 (信息.signatures ?: emptyArray()).map { it.toByteArray().toList() }
             }
-        } catch (_: Exception) { emptyList() }
+        } catch (忽略: Exception) { emptyList() }
     }
 
 /**
@@ -156,7 +156,7 @@ object 签名校验器 {
         return try {
             val 干净 = 文本.lines().filter { !it.startsWith("-----") }.joinToString("").trim()
             Base64.decode(干净, Base64.DEFAULT)
-        } catch (_: Exception) { null }
+        } catch (忽略: Exception) { null }
     }
 
 /**
@@ -171,7 +171,7 @@ object 签名校验器 {
  * 注意：比较哈希必须用常数时间函数，禁止直接 ==。
  */
     fun 校验文件摘要(路径: String, 期望: String): 验签结果 {
-        val 通过 = try { 哈希工具.比较哈希(哈希工具.计算文件沙256(路径), 期望) } catch (_: Exception) { false }
+        val 通过 = try { 哈希工具.比较哈希(哈希工具.计算文件沙256(路径), 期望) } catch (忽略: Exception) { false }
         return 验签结果(通过, 期望, if (通过) "一致" else "不一致")
     }
 

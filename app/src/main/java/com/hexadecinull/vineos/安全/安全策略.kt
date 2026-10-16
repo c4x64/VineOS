@@ -74,7 +74,7 @@ object 安全策略 {
  * 注意：单项通过不代表整体安全，需组合判定。
  */
     fun 评估最小权限(上下文: Context): 策略结果 {
-        val 危险数 = try { 权限审计器.统计危险已授权(上下文) } catch (_: Exception) { 99 }
+        val 危险数 = try { 权限审计器.统计危险已授权(上下文) } catch (忽略: Exception) { 99 }
         val 通过 = 危险数 <= 5
         return 策略结果("最小权限", 通过, "危险授权$危险数 项")
     }
@@ -120,7 +120,7 @@ object 安全策略 {
  * 注意：单项通过不代表整体安全，需组合判定。
  */
     fun 评估沙箱隔离(上下文: Context): 策略结果 {
-        val 分 = try { 沙箱检查器.综合评分(上下文) } catch (_: Exception) { 0 }
+        val 分 = try { 沙箱检查器.综合评分(上下文) } catch (忽略: Exception) { 0 }
         val 通过 = 分 >= 60
         return 策略结果("沙箱隔离", 通过, "评分$分")
     }
@@ -228,7 +228,7 @@ object 安全策略 {
  * 注意：单项通过不代表整体安全，需组合判定。
  */
     fun 评估多签拒绝(上下文: Context): 策略结果 {
-        val 通过 = !try { 签名校验器.是否多签(上下文, 上下文.packageName) } catch (_: Exception) { true }
+        val 通过 = !try { 签名校验器.是否多签(上下文, 上下文.packageName) } catch (忽略: Exception) { true }
         return 策略结果("多签拒绝", 通过, if (通过) "单签名" else "多签名")
     }
 

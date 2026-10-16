@@ -17,9 +17,9 @@ class 端口转发管理器 @Inject constructor(private val 执行器: 特权命
     private val 映射表 = ConcurrentHashMap<String, 端口映射>()
     private fun 键(协议: 转发协议, 宿主端口: Int): String = 协议.name + ":" + 宿主端口
     /** 探测 nft 是否可用。 */
-    fun 是否支持Nft(): Boolean = try { 执行器.探测二进制路径("nft").可用 } catch (_: Exception) { false }
+    fun 是否支持Nft(): Boolean = try { 执行器.探测二进制路径("nft").可用 } catch (忽略: Exception) { false }
     /** 探测 iptables 是否可用。 */
-    fun 是否支持Iptables(): Boolean = try { 执行器.探测二进制路径("iptables").可用 } catch (_: Exception) { false }
+    fun 是否支持Iptables(): Boolean = try { 执行器.探测二进制路径("iptables").可用 } catch (忽略: Exception) { false }
     /** 选择后端。 */
     fun 选择后端(期望: NAT后端): NAT后端 = when (期望) { NAT后端.自动 -> if (是否支持Nft()) NAT后端.NFTABLES else NAT后端.IPTABLES; else -> 期望 }
 
@@ -61,7 +61,7 @@ class 端口转发管理器 @Inject constructor(private val 执行器: 特权命
             if (!结果.是否成功()) { for (命令 in 构造Iptables转发(协议, 宿主端口, 容器地址, 容器端口)) { if (执行器.智能执行(命令, true).是否成功()) 成功 = true } } else 成功 = true
         }
         // 放行 FORWARD 链
-        try { val 路径 = 执行器.探测二进制路径("iptables").绝对路径 ?: "iptables"; 执行器.智能执行(listOf(路径, "-A", "FORWARD", "-d", 容器地址, "-p", "tcp", "--dport", 容器端口.toString(), "-j", "ACCEPT"), true) } catch (_: Exception) { }
+        try { val 路径 = 执行器.探测二进制路径("iptables").绝对路径 ?: "iptables"; 执行器.智能执行(listOf(路径, "-A", "FORWARD", "-d", 容器地址, "-p", "tcp", "--dport", 容器端口.toString(), "-j", "ACCEPT"), true) } catch (忽略: Exception) { }
         val 映射 = 端口映射(实例标识, 协议, 宿主端口, 容器地址, 容器端口, 实际后端, 成功, System.currentTimeMillis())
         映射表[键(协议, 宿主端口)] = 映射
         return 映射
@@ -75,7 +75,7 @@ class 端口转发管理器 @Inject constructor(private val 执行器: 特权命
                 val 删除形 = 命令.toMutableList(); val 位置 = 删除形.indexOf("-A"); if (位置 >= 0) 删除形[位置] = "-D"
                 执行器.智能执行(删除形, true)
             }; true
-        } catch (_: Exception) { false }
+        } catch (忽略: Exception) { false }
     }
 
     /** 启用子网伪装：真实执行 MASQUERADE。 */
