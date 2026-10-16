@@ -1,0 +1,91 @@
+name: Build ROMs
+
+on:
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: 'ROM versions to build (e.g. "7" or "7 9 11 12")'
+        required: false
+        default: '7'
+
+jobs:
+  build:
+    name: Build ranchu ROM
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [7, 9, 11, 12]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Filter to requested versions
+        id: pick
+        run: |
+          case " ${{ inputs.versions }} " in
+            *" ${{ matrix.version }} "*) echo "build=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "build=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Free disk space
+        if: steps.pick.outputs.build == 'true'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc 2>/dev/null || true
+          df -h
+
+      - name: Install AOSP build deps
+        if: steps.pick.outputs.build == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git gnupg flex bison build-essential zip curl \
+            libc6-dev libncurses5 x11proto-core-dev libx11-dev libgl1-mesa-dev \
+            libxml2-utils xsltproc unzip fontconfig python3-pip openjdk-11-jdk
+
+      - name: Install repo tool
+        if: steps.pick.outputs.build == 'true'
+        run: |
+          mkdir -p ~/bin
+          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+          chmod a+x ~/bin/repo
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+
+      - name: Build and package ROM
+        if: steps.pick.outputs.build == 'true'
+        run: |
+          OUT_DIR="$GITHUB_WORKSPACE/rom-out" AOSP_BASE="$HOME/aosp-vine" \
+            bash scripts/build_rom.sh "${{ matrix.version }}"
+
+      - name: Issue test licenses (ephemeral CI key, NOT production)
+        if: steps.pick.outputs.build == 'true'
+        run: |
+          pip install cryptography
+          python3 scripts/设备密钥生成.py 生成根密钥 --输出 /tmp/ci-root.json
+          python3 scripts/设备密钥生成.py 生成设备密钥 --设备标识 ci-test-device --输出目录 /tmp/ci-devices
+          for vrom in rom-out/*.vrom; do
+            id="$(basename "$vrom" .vrom)"
+            python3 scripts/按设备签名ROM.py 签发 \
+              --根密钥 /tmp/ci-root.json --rom "$vrom" --rom标识 "$id" \
+              --设备标识 ci-test-device \
+              --设备公钥hex "$(cat /tmp/ci-devices/ci-test-device.设备公钥.hex)" \
+              --输出 "rom-out/${id}.ci-test-device.license.json" --有效天数 7
+          done
+
+      - name: Verify test licenses
+        if: steps.pick.outputs.build == 'true'
+        run: |
+          PUB="$(python3 -c "import json;print(json.load(open('/tmp/ci-root.json'))['根公钥hex'])")"
+          for vrom in rom-out/*.vrom; do
+            id="$(basename "$vrom" .vrom)"
+            python3 scripts/按设备签名ROM.py 校验 \
+              --根公钥hex "$PUB" --rom "$vrom" \
+              --许可证 "rom-out/${id}.ci-test-device.license.json" \
+              --设备标识 ci-test-device
+          done
+
+      - name: Upload ROM artifacts
+        if: steps.pick.outputs.build == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: vine-rom-${{ matrix.version }}
+          path: rom-out/
+          retention-days: 14

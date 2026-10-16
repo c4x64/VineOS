@@ -30,6 +30,12 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Per-device ROM license root key (Ed25519 hex). Inject via
+        // -PromCaPubkeyHex=<hex> for release builds; empty means the
+        // license gate reports 未配置 and stays open (dev/CI only).
+        val romCaKey: String = (project.findProperty("romCaPubkeyHex") as String?) ?: ""
+        buildConfigField("String", "ROM_CA_PUBKEY_HEX", "\"$romCaKey\"")
+
         ndk {
             // Matches the host ABIs AbiCompat knows how to run natively or via QEMU; armeabi is excluded since no 32-bit-only ARM devices ship with Android 8+ (minSdk 26) in practice
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
@@ -162,6 +168,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
+    implementation(libs.bouncycastle)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

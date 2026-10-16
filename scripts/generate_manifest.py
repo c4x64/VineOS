@@ -49,7 +49,7 @@ def build_entry(vrom_path: Path, base_url: str, min_host_api_level: int) -> dict
     print(f"  hashing {vrom_path.name} ({size_bytes / 1_000_000:.0f} MB)...", file=sys.stderr)
     sha256 = sha256_of(vrom_path)
 
-    return {
+    entry = {
         "id": file_id,
         "displayName": internal["displayName"],
         "androidVersion": internal["androidVersion"],
@@ -63,6 +63,13 @@ def build_entry(vrom_path: Path, base_url: str, min_host_api_level: int) -> dict
         "has32BitSupport": internal.get("has32BitSupport", False),
         "releaseDate": internal.get("releaseDate", ""),
     }
+    # Per-device license fields (see docs/按设备签名.md). The internal
+    # manifest may carry them; otherwise they stay empty = unsigned legacy ROM.
+    if "licenseUrl" in internal:
+        entry["licenseUrl"] = internal["licenseUrl"]
+    if "caFingerprint" in internal:
+        entry["caFingerprint"] = internal["caFingerprint"]
+    return entry
 
 
 def main() -> int:

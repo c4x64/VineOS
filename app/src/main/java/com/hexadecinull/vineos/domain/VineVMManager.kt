@@ -13,6 +13,7 @@ import com.hexadecinull.vineos.service.VineService
 import com.hexadecinull.vineos.backend.用户态回退
 import com.hexadecinull.vineos.backend.虚拟化框架后端
 import com.hexadecinull.vineos.网络.网络命名空间管理器
+import com.hexadecinull.vineos.安全.许可证门禁
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Provider
@@ -34,6 +35,8 @@ class VineVMManager @Inject constructor(
     private val 用户态回退提供者: Provider<用户态回退>? = null,
     private val 虚拟化框架提供者: Provider<虚拟化框架后端>? = null,
     private val 命名空间提供者: Provider<网络命名空间管理器>? = null,
+    // 许可证门禁 ： 启动前按设备校验 ROM 授权 ， 为空时跳过门禁（旧调用兼容） 。
+    private val 许可证门禁提供者: Provider<许可证门禁>? = null,
 ) {
     private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -64,6 +67,20 @@ class VineVMManager @Inject constructor(
         scope.launch {
             val flow = statusFlows.getOrPut(instance.id) { MutableStateFlow(VMStatus.STOPPED) }
             flow.value = VMStatus.BOOTING
+
+            // 按设备许可证门禁 ： 无许可证、验签失败、过期或被吊销一律拒绝启动 。
+            val 门禁 = 许可证门禁提供者?.get()
+            if (门禁 != null) {
+                when (val 结论 = 门禁.检查实例(instance, context.filesDir)) {
+                    is 许可证门禁.放行结论.拒绝 -> {
+                        记录启动路径(instance.id, "许可证门禁拒绝 ｜ " + 结论.原因)
+                        flow.value = VMStatus.ERROR
+                        stopServiceIfIdle()
+                        return@launch
+                    }
+                    is 许可证门禁.放行结论.放行 -> Unit
+                }
+            }
 
             ContextCompat.startForegroundService(
                 context,

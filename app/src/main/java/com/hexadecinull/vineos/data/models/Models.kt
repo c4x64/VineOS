@@ -50,6 +50,10 @@ data class ROMImage(
     val localPath: String? = null,
     val isDownloaded: Boolean = false,
     val downloadState: ROMDownloadState = ROMDownloadState.NOT_DOWNLOADED,
+    // 按设备许可证：服务端为本设备签发的授权地址模板与根公钥指纹。
+    // 配置了根公钥的正式构建中，无许可证的 ROM 无法启动，需用脚本自签。
+    val licenseUrl: String? = null,
+    val caFingerprint: String = "",
 )
 
 enum class ROMDownloadState {

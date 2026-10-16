@@ -20,6 +20,9 @@ okhttp = "5.5.0"
 # with a KMP-first API; migrating is a bigger separate effort.
 coil = "2.7.0"
 shizuku = "13.1.5"
+# BouncyCastle: Ed25519 per-device ROM license verification on all API levels
+# (java.security Ed25519 alone needs API 33+; BC works back to minSdk 26)
+bouncycastle = "1.78.1"
 # ktlint Gradle plugin, 14.x adds Gradle 9.1 and built-in Kotlin support
 ktlint = "14.2.0"
 # Testing
@@ -86,6 +89,9 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 # Shizuku, non-root privilege elevation via ADB/wireless debugging or root
 shizuku-api = { group = "dev.rikka.shizuku", name = "api", version.ref = "shizuku" }
 shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", version.ref = "shizuku" }
+
+# Cryptography, per-device ROM licenses
+bouncycastle = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 
 # Testing, unit
 junit = { group = "junit", name = "junit", version.ref = "junit" }
