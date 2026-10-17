@@ -19,12 +19,13 @@ plugins {
 
 android {
     namespace = "com.hexadecinull.vineos"
-    compileSdk = 37
+    compileSdk = 35
+    ndkVersion = "27.0.11902837"
 
     defaultConfig {
         applicationId = "com.hexadecinull.vineos"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 1
         versionName = "0.1.0-alpha"
 
